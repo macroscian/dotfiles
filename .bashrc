@@ -4,7 +4,6 @@ module load python/2.7.3
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
-my_dir="$(dirname "$0")"
 
 export MY_WORKING=~/projects
 export MY_HTML=~/public_html/LIVE/results
@@ -14,7 +13,7 @@ export MY_R_PACKAGE=~/myR/crick.kellyg
 export PATH=$PATH:/usr/share/tcl8.4:$HOME/.local/bin
 
 export EDITOR="~/bin/bin/emacs -nw"
-source $mydir/.secrets #sets slackMessageID and slackName
+source $HOME/.secrets #sets slackMessageID and slackName
 
 # Completions
 complete -f -X '!*.sh' qsub
