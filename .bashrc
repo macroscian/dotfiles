@@ -14,6 +14,7 @@ export PATH=$PATH:/usr/share/tcl8.4:$HOME/.local/bin
 
 export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.secrets #sets slackMessageID and slackName
+source $HOME/.slurm.sh #sets slackMessageID and slackName
 
 # Completions
 complete -f -X '!*.sh' qsub
@@ -80,19 +81,6 @@ function slackCommand ()
     fi
 }
 
-
-function rslurm ()
-{
-local myName="$@"
-sbatch -e $myName.err.log \
-       -o $myName.out.log \
-       <<EOF
-#!/bin/bash
-#SBATCH -J $myName
-module load R
-Rscript $@
-EOF
-}
 
 function rsub ()
 {
