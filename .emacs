@@ -217,9 +217,13 @@
     (ido-read-file-name "Find File:" (concat "~/projects/" lab "/" scientist))
     )
   )
-  
-    
-  
+
+(setq tramp-default-mode "ssh")
+
+(setq tramp-remote-process-environment ())
+(add-to-list 'tramp-remote-process-environment
+	     (format "DISPLAY=%s" (getenv "DISPLAY")))
+
 ;; (defun myhtml ()
 ;;   (interactive)
 ;;   (let ((fname (if (string-match "/projects/" buffer-file-name)
