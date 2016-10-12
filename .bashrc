@@ -1,4 +1,4 @@
-module load python/2.7.3
+#module load python/2.7.3
 # .bashrcs
 # Source global definitions
 if [ -f /etc/bashrc ]; then
