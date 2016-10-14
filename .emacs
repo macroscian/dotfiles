@@ -182,6 +182,7 @@
   :config
   (yas-reload-all)
   :init
+  (setq yas-indent-line 'fixed)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'org-mode-hook 'yas-minor-mode)
   )
@@ -192,8 +193,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; work patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(set-register ?e '(file . "~/.emacs")) ; C-x r j e
-(set-register ?p '(file . "~/projects/projects.org")) ;C-x r j p
+(setq gpk-project-directory "/camp/stp/babs/working/kellyg/")
+(setq gpk-lab-names (directory-files "/camp/lab") . (directory-files "/camp/stp"))
+
+(dolist (r `((?p (file . ,(concat gpk-project-directory "work.org")))
+             (?e (file . ,(concat "~/.emacs")))
+             (?c "@crick.ac.uk")
+	     ))
+  (set-register (car r) (cadr r)))
+
 (defun gpk-lproj ()
   (interactive)
   "Find project directories"
@@ -268,7 +276,9 @@
     ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
  '(ess-swv-pdflatex-commands (quote ("pdflatex" "texi2pdf" "make")))
  '(ess-swv-processor (quote knitr))
-)
+ '(package-selected-packages
+   (quote
+    (bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
 
 
 (custom-set-faces
