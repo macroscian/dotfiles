@@ -7,6 +7,13 @@ sbatch -e $myName.err.log \
 #!/bin/bash
 #SBATCH -J $myName
 module load R
-Rscript $@
+srun Rscript $@
 EOF
 }
+
+function prepend ()
+{
+    awk 'BEGIN {print "#!/bin/bash\n'$@'"} {print "srun " $0}'
+}
+
+
