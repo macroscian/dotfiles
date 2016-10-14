@@ -156,26 +156,38 @@
   (use-package bookmark+))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package org
+  :init
+  (setq gpk-project-directory (concat "/camp/stp/babs/working/" user-login-name "/"))
+  (setq gpk-project-orgfile (concat gpk-project-directory "work.org"))
   :config
   (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'") ; default value
-  (setq org-agenda-files (list "~/projects/projects.org"))
-  (setq org-default-notes-file  "~/projects/projects.org")
+  (setq org-agenda-files (list gpk-project-orgfile))
+  (setq org-default-notes-file  gpk-project-orgfile)
   (setq org-log-done 'time)
-  (bind-key "C-c a"  'org-agenda)
-  (bind-key "C-c c" 'org-capture)
-  (bind-key "C-c o" 'gpk-guess-directory)
-  :init
   (setq org-capture-templates
       '(("t" "Todo" plain (file org-default-notes-file)
              "nt%?")
         ("p" "Project" plain (file org-default-notes-file)
              "np%?")))
-  ;; (let ((proj-buffer (get-buffer-window "projects.org"))
-  ;; 	)
-  ;;   (if 'proj-buffer (set-window-parameter proj-buffer 'no-other-window t))
+  ;; (defun gpk-org-property (prop)
+  ;;   (replace-regexp-in-string "[^a-z].*" "" (downcase (org-element-property prop (org-element-at-point))))
   ;;   )
-  ;;(set-window-parameter (get-buffer-window "projects.org") 'no-other-window t)
-  ;;  (set-window-dedicated-p (get-buffer-window "projects.org") t)
+  (defun gpk-org-property (prop)
+    (downcase (org-element-property prop (org-element-at-point)))
+    )
+  (defun gpk-guess-directory ()
+    (interactive)
+    "Open dired at best guess for where project lives"
+    (let ((lab (gpk-org-property :LAB))
+	  (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :SCIENTIST)))
+	  (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :PROJECT)))
+	  )
+      (ido-read-file-name "Find File:" (concat gpk-project-directory "projects/" lab "/" scientist "/" project))
+      )
+    )
+  (bind-key "C-c a"  'org-agenda)
+  (bind-key "C-c c" 'org-capture)
+  (bind-key "C-c o" 'gpk-guess-directory)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package yasnippet
@@ -186,82 +198,58 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'org-mode-hook 'yas-minor-mode)
   )
-
-
-
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; work patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq gpk-project-directory "/camp/stp/babs/working/kellyg/")
-(setq gpk-lab-names (directory-files "/camp/lab") . (directory-files "/camp/stp"))
-
-(dolist (r `((?p (file . ,(concat gpk-project-directory "work.org")))
+(setq gpk-lab-names (append
+		     '("external")
+		     (directory-files "/camp/lab" nil "^[a-z]")
+		     (directory-files "/camp/stp" nil "^[a-z]")))
+(dolist (r `((?p (file . ,(concat gpk-project-orgfile)))
              (?e (file . ,(concat "~/.emacs")))
              (?c "@crick.ac.uk")
 	     ))
   (set-register (car r) (cadr r)))
 
+
 (defun gpk-lproj ()
   (interactive)
   "Find project directories"
-  (insert (shell-command-to-string "find ~/projects -maxdepth 2 -mindepth 1 -type d -not -path '*/\.*' -printf '%P\n'")
+  (insert (shell-command-to-string
+	   (concat "find " gpk-project-directory "/projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n'")
+	   )
 	  ))
+
+(defun gpk-guess-orgnode ()
+  (interactive)
+  "Filter org at best guess for where project lives"
+  (let* (
+	 (mypath (file-name-directory buffer-file-name))
+	 (shortPath (replace-regexp-in-string gpk-project-directory "" mypath))
+	 (spl (split-string shortPath "/"))
+	 (lab (nth 1 spl))
+	 (scientist (concat (nth 2 spl) "@crick.ac.uk"))
+	)
+      (org-tags-view nil (concat "+Lab=\"" lab "\"+Scientist=\"" scientist "\""))
+      )
+  )
+
+
+
 (defun gpk-git-version ()
   (interactive)
   "Put git version into kill ring"
   (kill-new (shell-command-to-string "git log -1 --pretty=format:%h")
 	  ))
 
-(defun gpk-org-property (prop)
-  (replace-regexp-in-string "[^a-z].*" "" (downcase (org-element-property prop (org-element-at-point))))
-  )
-(defun gpk-guess-directory ()
-  (interactive)
-  "Open dired at best guess for where project lives"
-  (let ((lab (gpk-org-property :LAB))
-	 (scientist (gpk-org-property :SCIENTIST))
-	)
-    (ido-read-file-name "Find File:" (concat "~/projects/" lab "/" scientist))
-    )
-  )
 
 (setq tramp-default-mode "ssh")
 
 (setq tramp-remote-process-environment ())
 (add-to-list 'tramp-remote-process-environment
 	     (format "DISPLAY=%s" (getenv "DISPLAY")))
-
-;; (defun myhtml ()
-;;   (interactive)
-;;   (let ((fname (if (string-match "/projects/" buffer-file-name)
-;; 		   (replace-regexp-in-string "projects/\\([^/]*\\)/.*" "public_html/LIVE/results/\\1/index.html" buffer-file-name)
-;; 		 (replace-regexp-in-string "public_html/LIVE/results/\\([^/]*\\)/.*" "projects/\\1" buffer-file-name)
-;; 		 )
-;; 	       ))
-;;     (find-file (read-file-name "File:" fname fname))
-;;     )
-;;   )
-;; (defun gpk-find-org-file-recursively (&optional directory filext)
-;;   "Return .org and .org_archive files recursively from DIRECTORY.
-;; If FILEXT is provided, return files with extension FILEXT instead."
-;;   (interactive "DDirectory: ")
-;;   (let* (org-file-list
-;; 	 (case-fold-search t)	      ; filesystems are case sensitive
-;; 	 (file-name-regex "^[^.#].*") ; exclude dot, autosave, and backup files
-;; 	 (filext (or nil "org$\\\|org_archive"))
-;; 	 (fileregex (format "%s\\.\\(%s$\\)" file-name-regex filext))
-;; 	 (cur-dir-list (directory-files directory t file-name-regex)))
-;;     ;; loop over directory listing
-;;     (dolist (file-or-dir cur-dir-list org-file-list) ; returns org-file-list
-;;       (cond
-;;        ((file-regular-p file-or-dir) ; regular files
-;; 	(if (string-match fileregex file-or-dir) ; org files
-;; 	    (add-to-list 'org-file-list file-or-dir)))
-;;        ((file-directory-p file-or-dir)
-;; 	(dolist (org-file (gpk-find-org-file-recursively file-or-dir filext)
-;; 			  org-file-list) ; add files found to result
-;; 	  (add-to-list 'org-file-list org-file)))))))
 
 
 
@@ -278,7 +266,7 @@
  '(ess-swv-processor (quote knitr))
  '(package-selected-packages
    (quote
-    (bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
+    (f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
 
 
 (custom-set-faces
