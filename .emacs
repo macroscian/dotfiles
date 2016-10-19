@@ -1,4 +1,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Packages
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;(setq use-package-always-ensure t)
+(require 'package)
+(add-to-list 'package-archives
+ 	     '("marmalade" .
+ 	       "http://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives
+ 	     '("MELPA" .
+ 	       "http://melpa.milkbox.net/packages/"))
+(package-initialize)
+(require 'use-package)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Prefs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
@@ -6,7 +20,9 @@
       '((:eval (if (buffer-file-name)
 		   (abbreviate-file-name (buffer-file-name))
 		 "%b"))))
-(load-theme `leuven)
+;(load-theme `leuven)
+  (load-theme 'leuven t)
+
 (menu-bar-mode nil) 
 (scroll-bar-mode -1)
 (setq inhibit-splash-screen t)
@@ -54,19 +70,6 @@
     (backup-buffer)))
 (add-hook 'before-save-hook  'force-backup-of-buffer)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Packages
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(require 'package)
-(add-to-list 'package-archives
-	     '("marmalade" .
-	       "http://marmalade-repo.org/packages/"))
-(add-to-list 'package-archives
-	     '("MELPA" .
-	       "http://melpa.milkbox.net/packages/"))
-(package-initialize)
-(require 'use-package)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package undo-tree
@@ -266,7 +269,7 @@
  '(ess-swv-processor (quote knitr))
  '(package-selected-packages
    (quote
-    (f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
+    (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
 
 
 (custom-set-faces
