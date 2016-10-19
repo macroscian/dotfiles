@@ -5,12 +5,13 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
-export MY_WORKING=~/projects
+export MY_LAB=/camp/stp/babs/
+export MY_WORKING=${MY_LAB}working/kellyg/
 export MY_HTML=~/public_html/LIVE/results
-export MY_SCRATCH=/farm/scratch/rs-bio-lif/kelly02/projects
-export MY_WEBSPACE=https://bioinformatics.crick.ac.uk/~kelly02/results
-export MY_R_PACKAGE=~/myR/crick.kellyg
-export PATH=$PATH:/usr/share/tcl8.4:$HOME/.local/bin
+export MY_SCRATCH=${MY_LAB}scratch/kellyg/
+export MY_WEBSPACE=${MY_LAB}ww/
+export MY_R_PACKAGE=${MY_WORKING}code/R/
+export MY_PROJECTS=${MY_WORKING}projects/
 
 export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.secrets #sets slackMessageID and slackName
@@ -23,17 +24,13 @@ complete -f -X '!*.[r|R]' er
 
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-alias fastqc='java1.6 -classpath /farm/babs/software/FastQC uk.ac.bbsrc.babraham.FastQC.FastQCApplication &'
 alias l='ls -lrt'
 alias rout='tail *.Rout'
 alias r='R --no-save --no-restore'
-alias fastqc='java1.6 -classpath /farm/babs/software/FastQC uk.ac.bbsrc.babraham.FastQC.FastQCApplication '
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
-alias myq='showq | grep kelly02'
-alias myqn='showq -n | grep kelly02'
 alias rm="rm -i"
-alias lproj="find ~/projects -maxdepth 2 -mindepth 1 -type d -not -path '*/\.*' -printf '%P\n'"
+alias lproj="find $MY_PROJECTS -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/'"
 export PS1="[\h \W]\$ "
 
 function em ()
@@ -82,32 +79,5 @@ function slackCommand ()
 }
 
 
-function rsub ()
-{
-local myName="$@"
-local myOut=$PWD"/$@.log"
-echo "/farm/babs/redhat6/bin/Rscript $@" | msub -d $PWD -N "$myName" -j oe -o "$myOut"
-# $PWD"/.$@msub-log-myName"
-}
 
 
-function cdscratch ()
-{
-    local newDir=${PWD/#$MY_WORKING/$MY_SCRATCH}
-    cd ${newDir/#$MY_HTML/$MY_SCRATCH}
-}
-
-function cdworking ()
-{
-    local newDir=${PWD/#$MY_SCRATCH/$MY_WORKING}
-    cd ${newDir/#$MY_HTML/$MY_WORKING}
-}
-function cdhtml ()
-{
-    local newDir=${PWD/#$MY_WORKING/$MY_HTML}
-    cd ${newDir/#$MY_SCRATCH/$MY_HTML}
-}
-
-
-
-    
