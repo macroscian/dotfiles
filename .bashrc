@@ -9,8 +9,8 @@ export MY_LAB=/camp/stp/babs/
 export MY_WORKING=${MY_LAB}working/$USER/
 export MY_HTML=~/public_html/LIVE/results
 export MY_SCRATCH=${MY_LAB}scratch/$USER/
-export MY_WEBSPACE=${MY_LAB}ww/
-export MY_R_PACKAGE=${MY_WORKING}code/R/
+export MY_WEBSPACE=${MY_LAB}www/
+export MY_R_PACKAGE=${MY_WORKING}code/R/crick.kellyg
 export MY_PROJECTS=${MY_WORKING}projects/
 
 export EDITOR="~/bin/bin/emacs -nw"
@@ -33,10 +33,15 @@ alias rm="rm -i"
 alias lproj="find $MY_PROJECTS -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/'"
 export PS1="[\h \W]\$ "
 
-function em ()
-{
-    ~/bin/bin/emacs $@ &
-    }
+alias em="srun --ntasks=1 --x11 emacs &"
+alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
+alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
+
+
+#function em ()
+#{
+#    srun --ntasks=1 --x11  emacs $@
+#    }
 
 function slackJSON ()
 {
@@ -80,4 +85,4 @@ function slackCommand ()
 
 
 
-
+cd $MY_WORKING
