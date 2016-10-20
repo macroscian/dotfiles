@@ -1,0 +1,20 @@
+#key : np
+#name : New Project
+#contributor: Gavin Kelly <gavin.kelly@crick.ac.uk>
+# --
+* ${1:$(upcase-initials (replace-regexp-in-string "\\\." " " yas-text))} $3 [/]
+   DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to-time 14)))`
+   :PROPERTIES:
+   :Scientist: $1@crick.ac.uk
+   :Lab: ${4:$$(yas-choose-value gpk-lab-names)}
+   :Project: ${3:Project Name}
+   :Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
+   :Percentage: 0
+   :File:
+   :END:
+** TODO $0
+   DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to-time 14)))`
+   :PROPERTIES:
+   :Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
+   :END:
+
