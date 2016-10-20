@@ -2,6 +2,14 @@
 ;; Packages
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;(setq use-package-always-ensure t)
+;; Localisation
+(if (string-match "thecrick" (system-name))
+    (setq gpk-babshome "/camp/stp/babs/"
+	  gpk-oncamp t)
+  (setq gpk-babshome "I:\\"
+	gpk-oncamp nil)
+  )
+
 (require 'package)
 (add-to-list 'package-archives
  	     '("marmalade" .
@@ -20,9 +28,13 @@
       '((:eval (if (buffer-file-name)
 		   (abbreviate-file-name (buffer-file-name))
 		 "%b"))))
-;(load-theme `leuven)
-  (load-theme 'leuven t)
+					;(load-theme `leuven)
+(load-theme 'leuven t)
 
+(if gpk-oncamp
+    (set-face-attribute 'default nil :family "Liberation Mono")
+  (set-face-attribute 'default nil :family "Consolas")
+  )
 (menu-bar-mode nil) 
 (scroll-bar-mode -1)
 (setq inhibit-splash-screen t)
@@ -54,7 +66,7 @@
  kept-old-versions 2
  version-control t       ; use versioned backups
  vc-make-backup-files t
-)
+ )
 (defun force-backup-of-buffer ()
   ;; Make a special "per session" backup at the first save of each
   ;; emacs session.
@@ -126,8 +138,8 @@
      (concat "switchProject(\"" default-directory "\")")
      )
     )
-    
-		     
+  
+  
   :init
   (setq ess-default-style 'RStudio)
   :config
@@ -160,7 +172,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package org
   :init
-  (setq gpk-project-directory (concat "/camp/stp/babs/working/" user-login-name "/"))
+  (setq gpk-project-directory (concat gpk-babshome "working/" user-login-name "/"))
   (setq gpk-project-orgfile (concat gpk-project-directory "work.org"))
   :config
   (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'") ; default value
@@ -168,10 +180,10 @@
   (setq org-default-notes-file  gpk-project-orgfile)
   (setq org-log-done 'time)
   (setq org-capture-templates
-      '(("t" "Todo" plain (file org-default-notes-file)
-             "nt%?")
-        ("p" "Project" plain (file org-default-notes-file)
-             "np%?")))
+	'(("t" "Todo" plain (file org-default-notes-file)
+	   "nt%?")
+	  ("p" "Project" plain (file org-default-notes-file)
+	   "np%?")))
   ;; (defun gpk-org-property (prop)
   ;;   (replace-regexp-in-string "[^a-z].*" "" (downcase (org-element-property prop (org-element-at-point))))
   ;;   )
@@ -201,15 +213,27 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'org-mode-hook 'yas-minor-mode)
   )
-  
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; work patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq gpk-lab-names (append
-		     '("external")
-		     (directory-files "/camp/lab" nil "^[a-z]")
-		     (directory-files "/camp/stp" nil "^[a-z]")))
+
+(if gpk-oncamp
+    (setq gpk-lab-names (append
+			 '("external")
+			 (directory-files "/camp/lab" nil "^[a-z]")
+			 (directory-files "/camp/stp" nil "^[a-z]")))
+  (setq gpk-lab-names (append
+		       '("external")
+		       (mapcar 
+			(lambda (x) (replace-regexp-in-string "lab-" "" x))
+			(directory-files "\\\\data.thecrick.org" nil "^[a-z]"))
+		       )
+	)
+  )
+
+
 (dolist (r `((?p (file . ,(concat gpk-project-orgfile)))
              (?e (file . ,(concat "~/.emacs")))
              (?c "@crick.ac.uk")
@@ -234,9 +258,9 @@
 	 (spl (split-string shortPath "/"))
 	 (lab (nth 1 spl))
 	 (scientist (concat (nth 2 spl) "@crick.ac.uk"))
-	)
-      (org-tags-view nil (concat "+Lab=\"" lab "\"+Scientist=\"" scientist "\""))
-      )
+	 )
+    (org-tags-view nil (concat "+Lab=\"" lab "\"+Scientist=\"" scientist "\""))
+    )
   )
 
 
@@ -245,7 +269,7 @@
   (interactive)
   "Put git version into kill ring"
   (kill-new (shell-command-to-string "git log -1 --pretty=format:%h")
-	  ))
+	    ))
 
 
 (setq tramp-default-mode "ssh")
@@ -272,9 +296,9 @@
     (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
 
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:family "Consolas" :foundry "microsoft" :slant normal :weight normal :height 105 :width normal)))))
+					;(custom-set-faces
+;; custom-set-faces was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
+					; '(default ((t (:family "Consolas" :foundry "microsoft" :slant normal :weight normal :height 105 :width normal)))))
