@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# An example hook script that is called after a successful
+# commit is made.
+#
+# To enable this hook, rename this file to "post-commit".
+
+# create table commits(hash PRIMARY KEY, path TEXT, date TEXT, subject TEXT, lab TEXT, scientist TEXT, project TEXT);
+
+my_date=`git log -1 --pretty=format:%ad`
+my_hash=`git log -1 --pretty=format:%h`
+my_subject=`git log -1 --pretty=format:%s`
+my_path=$PWD
+my_project=`basename $PWD`
+tmp=`dirname $PWD`
+my_scientist=`basename $tmp`
+tmp=`dirname $tmp`
+my_lab=`basename $tmp`
+sqlite3 ~/projects/projects.db "insert into commits (hash,path,date,subject,lab,scientist,project) values (\"$my_hash\",\"$my_path\",\"$my_date\",\"$my_subject\",\"$my_lab\",\"$my_scientist\",\"$my_project\");"
+
+
+

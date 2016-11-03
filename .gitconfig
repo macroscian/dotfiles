@@ -1,0 +1,8 @@
+[user]
+	name = Gavin
+	email = gavin.kelly@crick.ac.uk
+[alias]
+	new = "!f() { cp -r ~/projects/template $1; git init $1; }; f"
+	
+[init]
+	templatedir = ~/.git_template
