@@ -291,14 +291,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(bmkp-last-as-first-bookmark-file "~/.emacs.bmk")
- '(custom-safe-themes
-   (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+ '(custom-safe-themes (quote ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
  '(ess-swv-pdflatex-commands (quote ("pdflatex" "texi2pdf" "make")))
  '(ess-swv-processor (quote knitr))
- '(package-selected-packages
-   (quote
-    (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
+ '(package-selected-packages (quote (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
 
 
 					;(custom-set-faces
@@ -307,3 +303,9 @@
 ;; Your init file should contain only one such instance.
 ;; If there is more than one, they won't work right.
 					; '(default ((t (:family "Consolas" :foundry "microsoft" :slant normal :weight normal :height 105 :width normal)))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
