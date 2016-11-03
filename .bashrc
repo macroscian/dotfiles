@@ -14,7 +14,7 @@ export MY_SCRATCH=${MY_LAB}scratch/$USER/
 export MY_WEBSPACE=${MY_LAB}www/
 export MY_R_PACKAGE=${MY_WORKING}code/R/crick.kellyg
 export MY_PROJECTS=${MY_WORKING}projects/
-export EDITOR="~/bin/bin/emacs -nw"
+#export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.slurm.sh #load slurm aliases
 
 # Completions
@@ -32,15 +32,25 @@ alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
 alias lproj="find $MY_PROJECTS -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/'"
 export PS1="[\h \W]\$ "
+alias xt="srun --ntasks=1 --x11  xterm"
 
 #alias em="srun --ntasks=1 --x11 emacs &"
 alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
 
 
+function ifgit ()
+{
+    if hash git 2>/dev/null; then
+	git "$@"
+    else
+	echo "Unable to version"
+    fi
+}
+
 function em ()
 {
-    srun --ntasks=1 --x11  emacs $@ &
+    srun --ntasks=1 --x11 -D $PWD emacs $@ &
     }
 
 function slackJSON ()
@@ -84,5 +94,7 @@ function slackCommand ()
 }
 
 
-
-cd $MY_WORKING
+if [[ "$PWD" == ~ ]] 
+then
+    cd $MY_WORKING
+fi
