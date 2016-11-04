@@ -110,55 +110,58 @@
   (diredp-toggle-find-file-reuse-dir 1)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package ess-site
-  :commands R
-  :preface
-  (defun kbw ()
-    "kill"
-    (interactive) (kill-buffer-and-window)
-    )
-  (defun replace-loop-with-first ()
-    "Replace a loop with setting the variable to first possible value"
-    (interactive)
-    (save-excursion
-      (let ((original (buffer-substring (line-beginning-position) (line-end-position)))
-	    )
-	(if (string-match " \*for (\\(\.\*\\) in \\(\.\*\\)) { \*" original)
-	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[1]" t nil original) nil nil)
-	  )
-	)
-      )
-    (ess-next-code-line 1)
-    )
-  (defun switch-project ()
-    "Send instructions to R to clear workspace"
-    (interactive)
-    (ess-send-string
-     (get-process "R")
-     (concat "switchProject(\"" default-directory "\")")
-     )
-    )
+;; (use-package ess-site
+;;   :commands R
+;;   :preface
+;;   (setq comint-scroll-to-bottom-on-input t)
+;;   (setq comint-scroll-to-bottom-on-output t)
+;;   (setq comint-move-point-for-output t)
+;;   (defun kbw ()
+;;     "kill"
+;;     (interactive) (kill-buffer-and-window)
+;;     )
+;;   (defun replace-loop-with-first ()
+;;     "Replace a loop with setting the variable to first possible value"
+;;     (interactive)
+;;     (save-excursion
+;;       (let ((original (buffer-substring (line-beginning-position) (line-end-position)))
+;; 	    )
+;; 	(if (string-match " \*for (\\(\.\*\\) in \\(\.\*\\)) { \*" original)
+;; 	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[1]" t nil original) nil nil)
+;; 	  )
+;; 	)
+;;       )
+;;     (ess-next-code-line 1)
+;;     )
+;;   (defun switch-project ()
+;;     "Send instructions to R to clear workspace"
+;;     (interactive)
+;;     (ess-send-string
+;;      (get-process "R")
+;;      (concat "switchProject(\"" default-directory "\")")
+;;      )
+;;     )
   
   
-  :init
-  (setq ess-default-style 'RStudio)
-  :config
-  (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
-  (bind-key "M-q" 'kbw ess-help-mode-map)
-  (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
-  (bind-key "C-<up>" 'comint-previous-matching-input-from-input inferior-ess-mode-map)
-  (bind-key "C-<down>" 'comint-next-matching-input-from-input inferior-ess-mode-map)
-  (setq comint-input-ring-size 1000)
-  (setq-default ess-dialect "R")
-  (setq ess-eval-visibly nil)
-  (setq ess-ask-for-ess-directory nil
-	inferior-R-args "--no-save --no-restore")
-  (use-package ess-tracebug
-    :config
-    (ess-tracebug t)
-    )
-  )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   :init
+;;   (setq ess-default-style 'RStudio)
+;;   :config
+;;   (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
+;;   (bind-key "M-q" 'kbw ess-help-mode-map)
+;;   (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
+;;   (bind-key "C-<up>" 'comint-previous-matching-input-from-input inferior-ess-mode-map)
+;;   (bind-key "C-<down>" 'comint-next-matching-input-from-input inferior-ess-mode-map)
+;;   (setq comint-input-ring-size 1000)
+;;   (setq-default ess-dialect "R")
+;;   (setq ess-eval-visibly nil)
+;;   (setq ess-ask-for-ess-directory nil
+;; 	inferior-R-args "--no-save --no-restore")
+;;   (use-package ess-tracebug
+;;     :config
+;;     (ess-tracebug t)
+;;     )
+;;   )
+
 (use-package highlight-parentheses
   :config
   (show-paren-mode t)
@@ -309,3 +312,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'downcase-region 'disabled nil)
