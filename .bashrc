@@ -5,48 +5,52 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 source $HOME/.secrets #Things I don't need on github
-# provides MY_LAB, slackMessageID, slackName
+# provides my_lab, slackMessageID, slackName
 
 
-export MY_WORKING=${MY_LAB}working/$USER/
-export MY_HTML=~/public_html/LIVE/results
-export MY_SCRATCH=${MY_LAB}scratch/$USER/
-export MY_WEBSPACE=${MY_LAB}www/
-export MY_R_PACKAGE=${MY_WORKING}code/R/crick.kellyg
-export MY_PROJECTS=${MY_WORKING}projects/
+export my_working=${my_lab}working/$USER/
+export my_html=${my_lab}www/$USER/public_html/LIVE/
+export my_scratch=${my_lab}scratch/$USER/
+export my_webspace=https://shiny-bioinformatics.crick.ac.uk/~$USER/
+export my_r_package=${my_working}code/R/crick.kellyg
+export MY_R_PACKAGE=${my_working}code/R/crick.kellyg # I used to name this capitalised
+export my_projects=${my_working}projects/
 #export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.slurm.sh #load slurm aliases
 
-# Completions
-complete -f -X '!*.sh' qsub
-complete -f -X '!*.pl' perl
+# Completions7
 complete -f -X '!*.[r|R]' er
 
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias l='ls -lrt'
 alias rout='tail *.Rout'
-alias r='R --no-save --no-restore'
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
-alias lproj="find $MY_PROJECTS -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/'"
 export PS1="[\h \W]\$ "
 alias xt="srun --ntasks=1 --x11  xterm"
 
-#alias em="srun --ntasks=1 --x11 emacs &"
+alias r='R --no-save --no-restore'
 alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
 
-
-function ifgit ()
+#Find all project directories that confirm to standard format, filtering by possible argument to function
+function lpro ()
 {
-    if hash git 2>/dev/null; then
-	git "$@"
-    else
-	echo "Unable to version"
-    fi
+find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/.' | grep ${1:-.}
 }
+#cd to project directory that matches the first argument
+function cdpro ()
+{
+cd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '*/\.*' -iname \*$1\* -printf '%P\n')
+}
+#Make function directory
+function startpro()
+{
+cp -r ${my_working}code/R/template/* $1; git init $1
+}
+
 
 function em ()
 {
@@ -96,5 +100,5 @@ function slackCommand ()
 
 if [[ "$PWD" == ~ ]] 
 then
-    cd $MY_WORKING
+    cd $my_working
 fi
