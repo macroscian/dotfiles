@@ -43,7 +43,7 @@ find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P
 #cd to project directory that matches the first argument
 function cdpro ()
 {
-cd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '*/\.*' -iname \*$1\* -printf '%P\n')
+cd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '*/\.*' -iname \*$1\* -printf '%P\n' | tail -1)
 }
 #Make function directory
 function startpro()
