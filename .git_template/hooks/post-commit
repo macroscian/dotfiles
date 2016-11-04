@@ -7,16 +7,21 @@
 
 # create table commits(hash PRIMARY KEY, path TEXT, date TEXT, subject TEXT, lab TEXT, scientist TEXT, project TEXT);
 
-my_date=`git log -1 --pretty=format:%ad`
-my_hash=`git log -1 --pretty=format:%h`
-my_subject=`git log -1 --pretty=format:%s`
-my_path=$PWD
-my_project=`basename $PWD`
-tmp=`dirname $PWD`
-my_scientist=`basename $tmp`
-tmp=`dirname $tmp`
-my_lab=`basename $tmp`
-sqlite3 $MY_WORKING/projects.db "insert into commits (hash,path,date,subject,lab,scientist,project) values (\"$my_hash\",\"$my_path\",\"$my_date\",\"$my_subject\",\"$my_lab\",\"$my_scientist\",\"$my_project\");"
+function insert_commit ()
+{
+local date=`git log -1 --pretty=format:%ad`
+local hash=`git log -1 --pretty=format:%h`
+local subject=`git log -1 --pretty=format:%s`
+local path=$PWD
+local project=`basename $PWD`
+local tmp=`dirname $PWD`
+local scientist=`basename $tmp`
+local tmp=`dirname $tmp`
+local lab=`basename $tmp`
+sqlite3 ${my_working}/projects.db "insert into commits (hash,path,date,subject,lab,scientist,project) values (\"$hash\",\"$path\",\"$date\",\"$subject\",\"$lab\",\"$scientist\",\"$project\");"
+}
+insert_commit
+
 
 
 
