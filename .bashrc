@@ -10,6 +10,7 @@ source $HOME/.secrets #Things I don't need on github
 
 export my_working=${my_lab}working/$USER/
 export my_html=${my_lab}www/$USER/public_html/LIVE/
+export my_emailname="gavin.kelly"
 export my_scratch=${my_lab}scratch/$USER/
 export my_webspace=https://shiny-bioinformatics.crick.ac.uk/~$USER/
 export my_r_package=${my_working}code/R/crick.kellyg
@@ -30,7 +31,7 @@ alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
 export PS1="[\h \W]\$ "
 alias xt="srun --ntasks=1 --x11  xterm"
-
+alias cdw="cd $my_working"
 alias r='R --no-save --no-restore'
 alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
