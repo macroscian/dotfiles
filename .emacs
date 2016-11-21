@@ -1,15 +1,16 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Packages
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;(setq use-package-always-ensure t)
 ;; Localisation
 (if (string-match "thecrick" (system-name))
-    (setq gpk-babshome "/camp/stp/babs/"
+    (setq gpk-babshome (getenv "my_lab")
 	  gpk-oncamp t)
   (setq gpk-babshome "I:\\"
 	gpk-oncamp nil)
   )
-
+(setq inhibit-default-init t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Packages
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;(setq use-package-always-ensure t)
+(add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'package)
 (add-to-list 'package-archives
  	     '("marmalade" .
@@ -19,18 +20,12 @@
  	       "http://melpa.milkbox.net/packages/"))
 (package-initialize)
 (require 'use-package)
-
+(require 'dash)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Prefs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
-(setq frame-title-format
-      '((:eval (if (buffer-file-name)
-		   (abbreviate-file-name (buffer-file-name))
-		 "%b"))))
-					;(load-theme `leuven)
 (load-theme 'leuven t)
-
 (if gpk-oncamp
     (set-face-attribute 'default nil :family "Liberation Mono")
   (set-face-attribute 'default nil :family "Consolas")
@@ -45,6 +40,7 @@
 (global-font-lock-mode t); syntax highlighting
 (delete-selection-mode t); entry deletes marked text
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
 (add-hook 'text-mode-hook 'turn-on-auto-fill) ; wrap long lines in text mode
 ;;Shell
 (setq shell-file-name "bash")
@@ -110,57 +106,61 @@
   (diredp-toggle-find-file-reuse-dir 1)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package ess-site
-;;   :commands R
-;;   :preface
-;;   (setq comint-scroll-to-bottom-on-input t)
-;;   (setq comint-scroll-to-bottom-on-output t)
-;;   (setq comint-move-point-for-output t)
-;;   (defun kbw ()
-;;     "kill"
-;;     (interactive) (kill-buffer-and-window)
-;;     )
-;;   (defun replace-loop-with-first ()
-;;     "Replace a loop with setting the variable to first possible value"
-;;     (interactive)
-;;     (save-excursion
-;;       (let ((original (buffer-substring (line-beginning-position) (line-end-position)))
-;; 	    )
-;; 	(if (string-match " \*for (\\(\.\*\\) in \\(\.\*\\)) { \*" original)
-;; 	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[1]" t nil original) nil nil)
-;; 	  )
-;; 	)
-;;       )
-;;     (ess-next-code-line 1)
-;;     )
-;;   (defun switch-project ()
-;;     "Send instructions to R to clear workspace"
-;;     (interactive)
-;;     (ess-send-string
-;;      (get-process "R")
-;;      (concat "switchProject(\"" default-directory "\")")
-;;      )
-;;     )
+(use-package ess-site
+  :commands R
+  :mode (("\\.r\\'" . R-mode)
+	 ("\\.R\\'" . R-mode))
+  :preface
+  (setq ess-ask-for-ess-directory nil)
+  (setq ess-history-file nil)
+  (setq comint-scroll-to-bottom-on-input t)
+  (setq comint-scroll-to-bottom-on-output t)
+  (setq comint-move-point-for-output t)
+  (defun kbw ()
+    "kill"
+    (interactive) (kill-buffer-and-window)
+    )
+  (defun replace-loop-with-first ()
+    "Replace a loop with setting the variable to first possible value"
+    (interactive)
+    (save-excursion
+      (let ((original (buffer-substring (line-beginning-position) (line-end-position)))
+	    )
+	(if (string-match " \*for (\\(\.\*\\) in \\(\.\*\\)) { \*" original)
+	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[1]" t nil original) nil nil)
+	  )
+	)
+      )
+    (ess-next-code-line 1)
+    )
+  (defun switch-project ()
+    "Send instructions to R to clear workspace"
+    (interactive)
+    (ess-send-string
+     (get-process "R")
+     (concat "switchProject(\"" default-directory "\")")
+     )
+    )
   
-  
-;;   :init
-;;   (setq ess-default-style 'RStudio)
-;;   :config
-;;   (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
-;;   (bind-key "M-q" 'kbw ess-help-mode-map)
-;;   (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
-;;   (bind-key "C-<up>" 'comint-previous-matching-input-from-input inferior-ess-mode-map)
-;;   (bind-key "C-<down>" 'comint-next-matching-input-from-input inferior-ess-mode-map)
-;;   (setq comint-input-ring-size 1000)
-;;   (setq-default ess-dialect "R")
-;;   (setq ess-eval-visibly nil)
-;;   (setq ess-ask-for-ess-directory nil
-;; 	inferior-R-args "--no-save --no-restore")
-;;   (use-package ess-tracebug
-;;     :config
-;;     (ess-tracebug t)
-;;     )
-;;   )
+
+  :init
+  (setq ess-default-style 'RStudio)
+  :config
+  (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
+  (bind-key "M-q" 'kbw ess-help-mode-map)
+  (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
+  (bind-key "C-<up>" 'comint-previous-matching-input-from-input inferior-ess-mode-map)
+  (bind-key "C-<down>" 'comint-next-matching-input-from-input inferior-ess-mode-map)
+  (setq comint-input-ring-size 1000)
+  (setq-default ess-dialect "R")
+  (setq ess-eval-visibly nil)
+  (setq ess-ask-for-ess-directory nil
+ 	inferior-R-args "--no-save --no-restore")
+  (use-package ess-tracebug
+    :init
+    (ess-tracebug t)
+    )
+  )
 
 (use-package highlight-parentheses
   :config
@@ -197,9 +197,9 @@
   (defun gpk-guess-directory ()
     (interactive)
     "Open dired at best guess for where project lives"
-    (let* ((lab (gpk-org-property :LAB))
-	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :SCIENTIST)))
-	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :PROJECT)))
+    (let* ((lab (gpk-org-property :lab))
+	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :scientist)))
+	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :project)))
 	   (guess-dir (concat gpk-project-directory "projects/" lab "/" scientist "/" project))
 	   )
       (if (file-exists-p guess-dir)
@@ -214,18 +214,42 @@
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package yasnippet
-  :config
-  (yas-reload-all)
+  :commands
+  (yas-minor-mode)
   :init
   (setq yas-indent-line 'fixed)
-  (add-hook 'prog-mode-hook 'yas-minor-mode)
-  (add-hook 'org-mode-hook 'yas-minor-mode)
+  (add-hook 'prog-mode-hook #'yas-minor-mode)
+  (add-hook 'org-mode-hook #'yas-minor-mode)
+  :config
+  (yas-reload-all)
   )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;; work patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun gpk-abbrev (pth)
+  (let ((gpk-abbrev-alist `(("//CAMP/working/kellyg/projects/" ."PROJ>")
+			    ("//CAMP/working/kellyg/" . "GPK>")
+			    ("//CAMP/working/" . "WORK>")
+			    ("//CAMP" . "BABS>")
+			    ((getenv "HOME") . "~/")
+			    )))
+    (-reduce-from (lambda (thispth sublist) (replace-regexp-in-string 
+					     (replace-regexp-in-string "^//CAMP/" gpk-babshome (car sublist))
+					     (cdr sublist) thispth))
+		  pth gpk-abbrev-alist)
+    )
+  )
+
+
+
+(setq frame-title-format
+      '((:eval (gpk-abbrev (if (buffer-file-name)
+			       (buffer-file-name)
+			     (comint-directory "."))
+			   )))
+)
 
 (if gpk-oncamp
     (setq gpk-lab-names (append
@@ -244,6 +268,7 @@
 
 (dolist (r `((?p (file . ,(concat gpk-project-orgfile)))
              (?e (file . ,(concat "~/.emacs")))
+             (?r (file . ,(concat gpk-babshome "working/kellyg/code/R/crick.kellyg/R")))
              (?c "@crick.ac.uk")
 	     ))
   (set-register (car r) (cadr r)))
@@ -281,7 +306,6 @@
 
 
 (setq tramp-default-mode "ssh")
-
 (setq tramp-remote-process-environment ())
 (add-to-list 'tramp-remote-process-environment
 	     (format "DISPLAY=%s" (getenv "DISPLAY")))
@@ -312,4 +336,3 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(put 'downcase-region 'disabled nil)
