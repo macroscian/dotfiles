@@ -6,7 +6,7 @@ if [ -f /etc/bashrc ]; then
 fi
 source $HOME/.secrets #Things I don't need on github
 # provides my_lab, slackMessageID, slackName
-
+shopt -s direxpand
 
 export my_working=${my_lab}working/$USER/
 export my_html=${my_lab}www/$USER/public_html/LIVE/
