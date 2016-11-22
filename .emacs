@@ -45,6 +45,7 @@
 ;;Shell
 (setq shell-file-name "bash")
 (setq shell-command-switch "-c")
+(setq process-connection-type t)
 ;; Scrolling
 (setq scroll-preserve-screen-position "always"
       scroll-conservatively 5
@@ -204,7 +205,10 @@
 	   )
       (if (file-exists-p guess-dir)
 	  (find-file (ido-read-file-name "Find File:" guess-dir))
-	(copy-directory (concat gpk-project-directory "code/R/template") guess-dir nil t)
+	(shell-command (concat "mkdir -p " guess-dir))
+	(shell-command (concat "cp -r " gpk-project-directory "code/R/template/* " guess-dir))
+	(shell-command (concat "cd " guess-dir ";git init --template=" gpk-project-directory "code/R/template/.git_template"))
+;	(copy-directory (concat gpk-project-directory "code/R/template") guess-dir nil t)
 	)
       )
     )

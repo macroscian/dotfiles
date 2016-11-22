@@ -59,7 +59,9 @@ cd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '
 #Make function directory
 function startpro()
 {
-cp -r ${my_working}code/R/template/* $1; git init $1
+mkdir -p $1
+cp -r ${my_working}code/R/template/* $1
+git init --template=${my_working}code/R/template/.git_template $1
 }
 
 
