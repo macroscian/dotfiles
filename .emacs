@@ -176,8 +176,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package org
   :init
-  (setq gpk-project-directory (concat gpk-babshome "working/" user-login-name "/"))
-  (setq gpk-project-orgfile (concat gpk-project-directory "work.org"))
+  (setq gpk-working-directory (concat gpk-babshome "working/" user-login-name "/"))
+  (setq gpk-project-orgfile (concat gpk-working-directory "work.org"))
   :config
   (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'") ; default value
   (setq org-agenda-files (list gpk-project-orgfile))
@@ -201,14 +201,14 @@
     (let* ((lab (gpk-org-property :lab))
 	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :scientist)))
 	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :project)))
-	   (guess-dir (concat gpk-project-directory "projects/" lab "/" scientist "/" project))
+	   (guess-dir (concat gpk-working-directory "projects/" lab "/" scientist "/" project))
 	   )
       (if (file-exists-p guess-dir)
 	  (find-file (ido-read-file-name "Find File:" guess-dir))
 	(shell-command (concat "mkdir -p " guess-dir))
-	(shell-command (concat "cp -r " gpk-project-directory "code/R/template/* " guess-dir))
-	(shell-command (concat "cd " guess-dir ";git init --template=" gpk-project-directory "code/R/template/.git_template"))
-;	(copy-directory (concat gpk-project-directory "code/R/template") guess-dir nil t)
+	(shell-command (concat "cp -r " gpk-working-directory "code/R/template/* " guess-dir))
+	(shell-command (concat "cd " guess-dir ";git init --template=" gpk-working-directory "code/R/template/.git_template"))
+;	(copy-directory (concat gpk-working-directory "code/R/template") guess-dir nil t)
 	)
       )
     )
@@ -282,7 +282,7 @@
   (interactive)
   "Find project directories"
   (insert (shell-command-to-string
-	   (concat "find " gpk-project-directory "/projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n'")
+	   (concat "find " gpk-working-directory "/projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n'")
 	   )
 	  ))
 
@@ -291,7 +291,7 @@
   "Filter org at best guess for where project lives"
   (let* (
 	 (mypath (file-name-directory buffer-file-name))
-	 (shortPath (replace-regexp-in-string gpk-project-directory "" mypath))
+	 (shortPath (replace-regexp-in-string gpk-working-directory "" mypath))
 	 (spl (split-string shortPath "/"))
 	 (lab (nth 1 spl))
 	 (scientist (concat (nth 2 spl) "@crick.ac.uk"))
