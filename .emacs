@@ -45,7 +45,6 @@
 ;;Shell
 (setq shell-file-name "bash")
 (setq shell-command-switch "-c")
-(setq process-connection-type t)
 ;; Scrolling
 (setq scroll-preserve-screen-position "always"
       scroll-conservatively 5
