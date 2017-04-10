@@ -258,7 +258,8 @@
 			    ("//CAMP/working/kellyg/" . "GPK>")
 			    ("//CAMP/working/" . "WORK>")
 			    ("//CAMP" . "BABS>")
-			    ((getenv "HOME") . "~/")
+			    (,(getenv "HOME") . "~")
+			    ("/home/camp/kellyg" . "~")
 			    )))
     (-reduce-from (lambda (thispth sublist) (replace-regexp-in-string 
 					     (replace-regexp-in-string "^//CAMP/" gpk-babshome (car sublist))
@@ -266,7 +267,6 @@
 		  pth gpk-abbrev-alist)
     )
   )
-
 
 
 (setq frame-title-format
