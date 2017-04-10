@@ -147,6 +147,13 @@
      )
     )
   
+  (defun gpk-ess-clip ()
+    (interactive)
+    "Evaluate region and store results in kill ring"
+    (kill-new (substring (
+	       ess-string-command  (concat (buffer-substring (mark) (point)) "\n"))
+			 4)
+	      ))
 
   :init
   (setq ess-default-style 'RStudio)
