@@ -163,6 +163,7 @@
   (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
   (bind-key "C-<up>" 'comint-previous-matching-input-from-input inferior-ess-mode-map)
   (bind-key "C-<down>" 'comint-next-matching-input-from-input inferior-ess-mode-map)
+  (bind-key "C-c ="  'gpk-ess-clip ess-mode-map)
   (setq comint-input-ring-size 1000)
   (setq-default ess-dialect "R")
   (setq ess-eval-visibly nil)
