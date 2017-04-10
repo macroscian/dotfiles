@@ -19,6 +19,7 @@ export my_webspace=https://shiny-bioinformatics.crick.ac.uk/~$USER/
 export my_r_package=${my_working}code/R/crick.kellyg
 export MY_R_PACKAGE=${my_working}code/R/crick.kellyg # I used to name this capitalised
 export my_projects=${my_working}projects/
+export TERM=gnome
 #export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.bash.slurm #load slurm aliases
 
@@ -28,20 +29,25 @@ complete -f -X '!*.[r|R]' er
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias l='ls -lrt'
-alias rout='tail *.Rout'
+alias rout='tail *.out.log'
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
 export PS1="[\h \W]\$ "
-alias xt="srun --ntasks=1 --x11  xterm"
+alias xt="srun --ntasks=1 --x11  xterm &"
 alias cdw="cd $my_working"
 alias r='R --no-save --no-restore'
 alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
 function em ()
 {
+if [[ $HOSTNAME == lifcpu* ]]
+then
+    emacs $@ &
+else
     srun --ntasks=1 --x11 -D $PWD emacs $@ &
-    }
+fi
+}
 
 
 ################################################################
@@ -76,3 +82,4 @@ if [[ "$PWD" == ~ ]]
 then
     cd $my_working
 fi
+
