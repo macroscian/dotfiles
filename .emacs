@@ -190,6 +190,7 @@
   :init
   (setq gpk-working-directory (concat gpk-babshome "working/" user-login-name "/"))
   (setq gpk-project-orgfile (concat gpk-working-directory "work.org"))
+  (add-to-list 'auto-mode-alist '("README$" . org-mode))
   :config
   (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'") ; default value
   (setq org-agenda-files (list gpk-project-orgfile))
