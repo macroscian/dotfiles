@@ -290,6 +290,28 @@
 	)
   )
 
+(defun gpk-derived-dir ()
+  (interactive)
+  "In a project directory, generate a list of related directories"
+    (let* ((wd (split-string (replace-regexp-in-string ".*/projects/" "" (file-name-directory buffer-file-name)) "/"))
+	   (lab (pop wd))
+	   (scientist (pop wd))
+	   (project (pop wd))
+	   (derived (list (cons 'output (mapconcat 'file-name-as-directory (list
+									    (getenv "my_lab") "outputs" lab scientist (getenv "my_emailname") project
+									    ) ""))
+			  (cons 'web (mapconcat 'file-name-as-directory (list
+									 "https://shiny-bioinformatics.crick.ac.uk/~kellyg" lab scientist project
+									 ) ""))
+			  (cons 'input (mapconcat 'file-name-as-directory (list
+									   "data.thecrick.org" (concat "lab-" lab) "input/babs" (getenv "my_emailname") scientist project
+									   ) ""))
+			  )
+		    )
+	   )
+      (dired (list "test"  (cdr (assoc 'output derived)) "results"))
+      )
+)
 
 (dolist (r `((?p (file . ,(concat gpk-project-orgfile)))
              (?e (file . ,(concat "~/.emacs")))
