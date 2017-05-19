@@ -111,10 +111,10 @@
   (diredp-toggle-find-file-reuse-dir 1)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package ess-site
-  :commands R
-  :mode (("\\.r\\'" . R-mode)
-	 ("\\.R\\'" . R-mode))
+ (use-package ess-site
+   :commands R
+   :mode (("\\.r\\'" . R-mode)
+	  ("\\.R\\'" . R-mode))
   :preface
   (setq ess-ask-for-ess-directory nil)
   (setq ess-history-file nil)
@@ -167,13 +167,13 @@
   (setq comint-input-ring-size 1000)
   (setq-default ess-dialect "R")
   (setq ess-eval-visibly nil)
-  (setq ess-ask-for-ess-directory nil
- 	inferior-R-args "--no-save --no-restore")
-  (use-package ess-tracebug
-    :init
-    (ess-tracebug t)
-    )
-  )
+   (setq ess-ask-for-ess-directory nil
+  	inferior-R-args "--no-save --no-restore")
+   ;; (use-package ess-tracebug
+   ;;   :init
+   ;;   (ess-tracebug t)
+   ;;   )
+   )
 
 (use-package highlight-parentheses
   :config
@@ -211,9 +211,9 @@
   (defun gpk-guess-directory ()
     (interactive)
     "Open dired at best guess for where project lives"
-    (let* ((lab (gpk-org-property :lab))
-	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :scientist)))
-	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :project)))
+    (let* ((lab (gpk-org-property :LAB))
+	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :SCIENTIST)))
+	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :PROJECT)))
 	   (guess-dir (concat gpk-working-directory "projects/" lab "/" scientist "/" project))
 	   )
       (if (file-exists-p guess-dir)
@@ -231,7 +231,7 @@
     (require 'org-element)
     (let ((parsetree (org-element-parse-buffer 'headline))) 
       (org-element-map parsetree 'headline 
-		       (lambda (hl) (list (org-element-property :lab hl) (org-element-property :title hl) (org-element-property :opened hl)))))
+		       (lambda (hl) (list (org-element-property :LAB hl) (org-element-property :TITLE hl) (org-element-property :OPENED hl)))))
     )
   (bind-key "C-c a"  'org-agenda)
   (bind-key "C-c c" 'org-capture)
@@ -365,11 +365,22 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(bmkp-last-as-first-bookmark-file "~/.emacs.bmk")
- '(custom-safe-themes (quote ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+ '(custom-safe-themes
+   (quote
+    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
  '(ess-swv-pdflatex-commands (quote ("pdflatex" "texi2pdf" "make")))
  '(ess-swv-processor (quote knitr))
- '(org-link-frame-setup (quote ((vm . vm-visit-folder-other-frame) (vm-imap . vm-visit-imap-folder-other-frame) (gnus . org-gnus-no-new-news) (file . find-file) (wl . wl-other-frame))))
- '(package-selected-packages (quote (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package))))
+ '(org-link-frame-setup
+   (quote
+    ((vm . vm-visit-folder-other-frame)
+     (vm-imap . vm-visit-imap-folder-other-frame)
+     (gnus . org-gnus-no-new-news)
+     (file . find-file)
+     (wl . wl-other-frame))))
+ '(package-selected-packages
+   (quote
+    (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package)))
+ '(safe-local-variable-values (quote ((inferior-R-program-name . "R-3.3-bio_module")))))
 
 
 					;(custom-set-faces
