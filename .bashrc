@@ -7,6 +7,8 @@ fi
 source $HOME/.secrets #Things I don't need on github
 # provides my_lab, slackMessageID, slackName
 shopt -s direxpand
+module use /camp/apps/eb/dev/modules/all
+module load Emacs
 
 MODULEPATH="${my_lab}working/software/eb/modules/all:${my_lab}working/software/modules/all:${MODULEPATH}";
 export MODULEPATH;
@@ -20,7 +22,7 @@ export my_r_package=${my_working}code/R/crick.kellyg
 export MY_R_PACKAGE=${my_working}code/R/crick.kellyg # I used to name this capitalised
 export my_projects=${my_working}projects/
 export TERM=gnome
-#export EDITOR="~/bin/bin/emacs -nw"
+export EDITOR="~/bin/bin/emacs -nw"
 source $HOME/.bash.slurm #load slurm aliases
 
 # Completions
@@ -29,7 +31,7 @@ complete -f -X '!*.[r|R]' er
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias l='ls -lrt'
-alias rout='tail *.out.log'
+alias ll='ls -lrt -I VERSION -I CHANGES -I SESSION_INFO -I README'
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
@@ -41,13 +43,18 @@ alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
 function em ()
 {
-if [[ $HOSTNAME == lifcpu* ]]
+if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
 then
     emacs $@ &
 else
     srun --ntasks=1 --x11 -D $PWD emacs $@ &
 fi
 }
+function rout ()
+{
+    tail $@*.{err,out}.log
+}
+
 
 
 ################################################################
