@@ -8,6 +8,9 @@
     .libPaths(c(file.path("/camp/stp/babs/working", Sys.info()["user"], "code/R/library",with(R.Version(), paste(major, minor, sep="."))),
                 file.path("/camp/stp/babs/working/software/binaries/R-site-library", myRVersion))
               )
+	      
 }
-
+setHook(packageEvent("grDevices", "onLoad"),
+function(...) grDevices::X11.options(type='cairo'))
+options(device='x11')
 #source("http://bioconductor.org/biocLite.R")
