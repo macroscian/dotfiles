@@ -13,6 +13,7 @@ module load Emacs
 MODULEPATH="${my_lab}working/software/eb/modules/all:${my_lab}working/software/modules/all:${MODULEPATH}";
 export MODULEPATH;
 
+export PATH=$PATH:. # So local R can be found in directories
 export my_working=${my_lab}working/$USER/
 export my_html=${my_lab}www/$USER/public_html/LIVE/
 export my_emailname="gavin.kelly"
