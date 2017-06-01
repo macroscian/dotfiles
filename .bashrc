@@ -42,6 +42,8 @@ alias cdw="cd $my_working"
 alias r='R --no-save --no-restore'
 alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
+alias template="cp -n /camp/stp/babs/working/kellyg/code/R/template/* ."
+
 function em ()
 {
 if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
