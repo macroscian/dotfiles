@@ -25,7 +25,13 @@ squeue -u kellyg -o  "%.28j %.6i %.9P %.2t %.10M %.6D %R"
 function rslurm ()
 {
 local myName="$@"
-source modules.sh
+numberR=`ls R-*-local | wc -l`
+if [ $numberR -eq 1 ]; then
+   source R-*-local
+else
+   echo "Too many R versions" 1>&2
+   return 1
+fi
 for i in "${module_array[@]}"
 do
         module load $i
