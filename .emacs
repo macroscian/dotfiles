@@ -245,6 +245,7 @@
   (setq yas-indent-line 'fixed)
   (add-hook 'prog-mode-hook #'yas-minor-mode)
   (add-hook 'org-mode-hook #'yas-minor-mode)
+  (add-hook 'ess-mode-hook #'yas-minor-mode)
   :config
   (yas-reload-all)
   )
