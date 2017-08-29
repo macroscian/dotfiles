@@ -9,6 +9,7 @@ source $HOME/.secrets #Things I don't need on github
 shopt -s direxpand
 module use -a /camp/apps/eb/dev/modules/all
 module use -a /camp/apps/eb/intel-2017a/modules/all
+module use -a  /camp/stp/babs/working/kellyg/code/eb/modules
 module load Emacs
 
 export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
@@ -16,7 +17,7 @@ export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
 MODULEPATH="${my_lab}working/software/eb/modules/all:${my_lab}working/software/modules/all:${MODULEPATH}";
 export MODULEPATH;
 
-export PATH=$PATH:. # So local R can be found in directories
+export PATH=$PATH:/camp/stp/babs/working/kellyg/code/bin:. # So local R can be found in directories
 export my_working=${my_lab}working/$USER/
 export my_html=${my_lab}www/$USER/public_html/LIVE/
 export my_emailname="gavin.kelly"
@@ -42,7 +43,7 @@ _cycle_dirs()
 
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-alias l='ls -lrt'
+alias l='ls -Hlrt'
 alias ll='ls -lrt -I VERSION -I CHANGES -I SESSION_INFO -I README'
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
