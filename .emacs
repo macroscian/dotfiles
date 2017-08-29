@@ -238,6 +238,12 @@
   (bind-key "C-c o" 'gpk-guess-directory)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package org-trello
+  :config
+  (custom-set-variables '(org-trello-files '("/camp/stp/babs/working/kellyg/trello.org")))
+  (show-paren-mode t)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package yasnippet
   :commands
   (yas-minor-mode)
@@ -378,9 +384,11 @@
      (gnus . org-gnus-no-new-news)
      (file . find-file)
      (wl . wl-other-frame))))
+ '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
+ '(org-trello-files (quote ("/camp/stp/babs/working/kellyg/trello.org")) nil (org-trello))
  '(package-selected-packages
    (quote
-    (leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package)))
+    (groovy-mode org-trello leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package)))
  '(safe-local-variable-values (quote ((inferior-R-program-name . "R-3.3-bio_module")))))
 
 
