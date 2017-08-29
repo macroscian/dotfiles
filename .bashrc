@@ -78,7 +78,7 @@ function rout ()
 #Find all project directories that confirm to standard format, filtering by possible argument to function
 function lpro ()
 {
-find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%P\n' | column -t -s '/.' | grep ${1:-.}
+find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%T+\t%P\n' | sort | cut -f2 -d$'\t' | column -t -s '/.' | grep ${1:-.}
 }
 
 #cd to project directory that matches the first argument
