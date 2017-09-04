@@ -9,13 +9,12 @@ source $HOME/.secrets #Things I don't need on github
 shopt -s direxpand
 module use -a /camp/apps/eb/dev/modules/all
 module use -a /camp/apps/eb/intel-2017a/modules/all
-module use -a  /camp/stp/babs/working/kellyg/code/eb/modules
+module use -a ${my_lab}working/kellyg/code/eb/modules/all
+module use -a ${my_lab}working/software/eb/modules/all
 module load Emacs
 
 export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
 
-MODULEPATH="${my_lab}working/software/eb/modules/all:${my_lab}working/software/modules/all:${MODULEPATH}";
-export MODULEPATH;
 
 export PATH=$PATH:/camp/stp/babs/working/kellyg/code/bin:. # So local R can be found in directories
 export my_working=${my_lab}working/$USER/
