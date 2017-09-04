@@ -81,6 +81,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(use-package magit
+  :commands magit-get-top-dir
+  :bind ("C-x g" . magit-status))
+
+
 (use-package expand-region
   :commands er/expand-region
   :bind ("C-=" . er/expand-region))
