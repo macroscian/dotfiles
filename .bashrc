@@ -10,8 +10,7 @@ shopt -s direxpand
 module use -a /camp/apps/eb/dev/modules/all
 module use -a /camp/apps/eb/intel-2017a/modules/all
 module use -a ${my_lab}working/kellyg/code/eb/modules/all
-module use -a ${my_lab}working/software/eb/modules/all
-module load Emacs
+module use -a ${my_lab}working/software/modules/all
 
 export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
 
@@ -26,7 +25,7 @@ export my_r_package=${my_working}code/R/crick.kellyg
 export MY_R_PACKAGE=${my_working}code/R/crick.kellyg # I used to name this capitalised
 export my_projects=${my_working}projects/
 export TERM=gnome
-export EDITOR="~/bin/bin/emacs -nw"
+export EDITOR="/usr/bin/emacs -nw -Q"
 source $HOME/.bash.slurm #load slurm aliases
 
 # Completions
@@ -55,11 +54,15 @@ alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
 alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
 alias template="cp -n /camp/stp/babs/working/kellyg/code/R/template/* ."
 alias dirs='dirs -v | sed "s;$my_projects;;g"'
+alias duh="du -d 1 -h | sort -h"
+
 
 function em ()
 {
 if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
 then
+    module load Emacs
+    module load git
     emacs $@ &
 else
     srun --ntasks=1 --x11 -D $PWD emacs $@ &
@@ -78,7 +81,11 @@ function rout ()
 #Find all project directories that confirm to standard format, filtering by possible argument to function
 function lpro ()
 {
-find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%T+\t%P\n' | sort | cut -f2 -d$'\t' | column -t -s '/.' | grep ${1:-.}
+    if [ "$#" -eq 1 ]; then
+find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*'  | cut -f2 -d$'\t' |  grep ${1:-.}
+else
+    find $my_projects -maxdepth 3 -mindepth 3 -type d -not -path '*/\.*' -printf '%T+\t%P\n' | sort | cut -f2 -d$'\t' | column -t -s '/.' | grep ${1:-.}
+    fi
 }
 
 #cd to project directory that matches the first argument
