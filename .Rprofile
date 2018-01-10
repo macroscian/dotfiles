@@ -5,12 +5,17 @@
                 )
     }
     myRVersion <- sub(".*/R/([^/]*)/.*", "\\1", .libPaths()[grepl("/camp/apps/eb", .libPaths())])
-    .libPaths(c(file.path("/camp/stp/babs/working", Sys.info()["user"], "code/R/library",with(R.Version(), paste(major, minor, sep="."))),
+    myRLIB <- file.path("/camp/stp/babs/working", Sys.info()["user"], "code/R/library",with(R.Version(), paste(major, minor, sep=".")))
+    if (!dir.exists(myRLIB)) {
+      dir.create(myRLIB)
+    }
+    .libPaths(c(myRLIB,
                 file.path("/camp/stp/babs/working/software/binaries/R-site-library", myRVersion))
               )
 	      
 }
+
 setHook(packageEvent("grDevices", "onLoad"),
-function(...) grDevices::X11.options(type='cairo'))
+        function(...) grDevices::X11.options(type='cairo'))
 options(device='x11')
-#source("http://bioconductor.org/biocLite.R")
+
