@@ -1,4 +1,5 @@
 ;; Localisation
+(setq org-hide-emphasis-markers t)
 (if (string-match "thecrick" (system-name))
     (setq gpk-babshome (getenv "my_lab")
 	  gpk-oncamp t)
@@ -27,15 +28,23 @@
 ;; Appearance
 (load-theme 'leuven t)
 (if gpk-oncamp
-    (set-face-attribute 'default nil :family "Liberation Mono")
+    (set-face-attribute 'default nil :family "Input")
   (set-face-attribute 'default nil :family "Consolas")
   )
+;; Use monospaced font faces in current buffer
+ (defun my-buffer-face-mode-fixed ()
+   "Sets a fixed width (monospace) font in current buffer"
+   (interactive)
+   (setq buffer-face-mode-face '(:family "Input-mono"))
+   (buffer-face-mode))
 (menu-bar-mode nil) 
 (scroll-bar-mode -1)
 (setq inhibit-splash-screen t)
 (tool-bar-mode -1); hide the toolbar
 (prefer-coding-system 'utf-8)
 (display-time-mode t)
+(global-prettify-symbols-mode 1)
+(defvar ESS-prettify-symbols-alist '())
 ;;Editing
 (global-font-lock-mode t); syntax highlighting
 (delete-selection-mode t); entry deletes marked text
@@ -85,6 +94,7 @@
   :commands magit-get-top-dir
   :bind ("C-x g" . magit-status))
 
+(use-package s)
 
 (use-package expand-region
   :commands er/expand-region
@@ -120,7 +130,7 @@
    :commands R
    :mode (("\\.r\\'" . R-mode)
 	  ("\\.R\\'" . R-mode))
-  :preface
+   :preface
   (setq ess-ask-for-ess-directory nil)
   (setq ess-history-file nil)
   (setq comint-scroll-to-bottom-on-input t)
@@ -159,10 +169,16 @@
 	       ess-string-command  (concat (buffer-substring (mark) (point)) "\n"))
 			 4)
 	      ))
-
+  (defun my-ESS-pretty-hook ()
+    "Set pretty symbols for R"
+    (setq prettify-symbols-alist '(("%>%"  . ?►) ("<-"  . ?←) ("==" . ?≡) ("%<>%" . ?◄))
+	  )
+    )
   :init
   (setq ess-default-style 'RStudio)
   :config
+  (add-hook `ess-mode-hook  `my-ESS-pretty-hook)
+;  (add-hook `iESS-mode-hook `my-buffer-face-mode-fixed)
   (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
   (bind-key "M-q" 'kbw ess-help-mode-map)
   (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
@@ -206,11 +222,18 @@
 	   "nt%?")
 	  ("p" "Project" plain (file org-default-notes-file)
 	   "np%?")))
-  ;; (defun gpk-org-property (prop)
-  ;;   (replace-regexp-in-string "[^a-z].*" "" (downcase (org-element-property prop (org-element-at-point))))
-  ;;   )
+  (setq org-time-clocksum-format "%d:%02d")
+  (defun my-org-clocktable-indent-string (level)
+    (if (= level 1)
+	""
+      (let ((str ""))
+	(while (> level 2)
+        ((set )q level (1- level)
+	 str (concat str "--")))
+	(concat str ""))))
+  (advice-add 'org-clocktable-indent-string :override #'my-org-clocktable-indent-string)
+  
   (defun gpk-org-property (prop)
-;    (downcase (org-element-property prop (org-element-at-point)))
     (downcase (plist-get (nth 1 (org-element-at-point)) prop))
     )
   (defun gpk-guess-directory ()
@@ -226,28 +249,13 @@
 	(shell-command (concat "mkdir -p " guess-dir))
 	(shell-command (concat "cp -r " gpk-working-directory "code/R/template/* " guess-dir))
 	(shell-command (concat "cd " guess-dir ";git init --template=" gpk-working-directory "code/R/template/.git_template; yes | bumpversion.sh"))
-;	(copy-directory (concat gpk-working-directory "code/R/template") guess-dir nil t)
 	)
       )
-    )
-  (defun gpk-dotproject ()
-    (interactive)
-    "Not finished - parse org to dotproject csv"
-    (require 'org-element)
-    (let ((parsetree (org-element-parse-buffer 'headline))) 
-      (org-element-map parsetree 'headline 
-		       (lambda (hl) (list (org-element-property :LAB hl) (org-element-property :TITLE hl) (org-element-property :OPENED hl)))))
     )
   (bind-key "C-c a"  'org-agenda)
   (bind-key "C-c c" 'org-capture)
   (bind-key "C-c o" 'gpk-guess-directory)
   )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package org-trello
-  :config
-  (custom-set-variables '(org-trello-files '("/camp/stp/babs/working/kellyg/trello.org")))
-  (show-paren-mode t)
-)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package yasnippet
   :commands
@@ -301,6 +309,7 @@
 		       )
 	)
   )
+
 
 (defun gpk-derived-dir ()
   (interactive)
@@ -356,6 +365,50 @@
   )
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;retain alpha of grant description
+(defun gpk-grant-key (grant)
+  "return suitable key for givent grant-row"
+  (replace-regexp-in-string "[^a-z]" ""  (downcase (nth 1 grant)))
+  )
+(defun gpk-grant-to-dir (glab)
+  "return most likely dlab for a  glab"
+  (let* (
+	(all-match (mapcar '(lambda (dirlab) (length (s-shared-start dirlab glab))) gpk-lab-names))
+	(max-len (seq-max all-match))
+	(which-max (seq-position all-match max-len))
+	)
+    (nth which-max gpk-lab-names)
+  ))
+
+(setq gpk-grants 
+      (let* (
+	     (fname (concat gpk-babshome "working/" user-login-name "/projects/.projects.txt"))
+	     (tab-delim (with-temp-buffer
+			  (insert-file-contents fname)
+			  (split-string (buffer-string) "\n" t)))
+	     (projects (cdr tab-delim))
+	     (project-map (mapcar '(lambda (a) (split-string a "\t")) projects))
+	     )
+	(seq-group-by '(lambda (g) (gpk-grant-to-dir (gpk-grant-key g)))  project-map)
+	)
+      )
+(defun gpk-labs-grants (lab)
+  "Return list of grants given lab"
+  (let* (
+	 (grant-row-keyed (seq-find '(lambda (g) (equal (car g) lab)) gpk-grants))
+	 (grant-row (cdr grant-row-keyed))
+	 )
+    (mapcar '(lambda (gs) (concat (car gs) " " (car (cdr gs)))) grant-row)
+    )
+  )
+   
+  
+   
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 
 (defun gpk-git-version ()
   (interactive)
@@ -376,12 +429,17 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(ansi-color-names-vector
+   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(bmkp-last-as-first-bookmark-file "~/.emacs.bmk")
  '(custom-safe-themes
    (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+    ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "412c25cf35856e191cc2d7394eed3d0ff0f3ee90bacd8db1da23227cdff74ca2" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
  '(ess-swv-pdflatex-commands (quote ("pdflatex" "texi2pdf" "make")))
  '(ess-swv-processor (quote knitr))
+ '(hl-sexp-background-color "#efebe9")
  '(org-link-frame-setup
    (quote
     ((vm . vm-visit-folder-other-frame)
@@ -389,11 +447,9 @@
      (gnus . org-gnus-no-new-news)
      (file . find-file)
      (wl . wl-other-frame))))
- '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
- '(org-trello-files (quote ("/camp/stp/babs/working/kellyg/trello.org")) nil (org-trello))
  '(package-selected-packages
    (quote
-    (groovy-mode org-trello leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package)))
+    (s svg image+ color-theme-solarized groovy-mode leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree yasnippet use-package)))
  '(safe-local-variable-values (quote ((inferior-R-program-name . "R-3.3-bio_module")))))
 
 
@@ -408,4 +464,4 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(comint-highlight-input ((t (:inherit nil :foreground "#0000FF" :weight normal)))))

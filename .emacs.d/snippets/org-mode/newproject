@@ -7,6 +7,7 @@ DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to
 :PROPERTIES:
 :Scientist: ${1:scientist}@crick.ac.uk
 :Lab: ${3:$$(yas-choose-value gpk-lab-names)}
+:Grant: ${4:$$(yas-choose-value (gpk-labs-grants (yas-field-value 3)))}
 :Project: ${2:Project Name}
 :Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
 :Percentage: 0
