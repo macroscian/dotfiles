@@ -2,12 +2,12 @@
 #name : New Project
 #contributor: Gavin Kelly <gavin.kelly@crick.ac.uk>
 # --
-** ${1:$(upcase-initials (replace-regexp-in-string "\\\." " " yas-text))} $2 [/]
+** ${1:$(upcase-initials (replace-regexp-in-string "\\\." " " yas-text))} $2 [[file:/camp/stp/babs/working/kellyg/projects/$3/$1/$2][⬎]] [/]
 DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to-time 14)))`
 :PROPERTIES:
 :Scientist: ${1:scientist}@crick.ac.uk
 :Lab: ${3:$$(yas-choose-value gpk-lab-names)}
-:Grant: ${4:$$(yas-choose-value (gpk-labs-grants (yas-field-value 3)))}
+:Code: ${4:$$(yas-choose-value (gpk-labs-grants (yas-field-value 3)))}
 :Project: ${2:Project Name}
 :Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
 :Percentage: 0
