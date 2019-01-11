@@ -6,3 +6,5 @@
 	templatedir = ~/.git_template
 [color]
 	ui = auto
+[core]
+	excludesfile = /home/camp/kellyg/.gitignore_global
