@@ -23,5 +23,10 @@ sqlite3 ${my_working}/projects.db "insert into commits (hash,path,date,subject,l
 insert_commit
 
 
+if [ -d www ]; then
+    for i in $(git ls-tree --name-only HEAD html/); do
+	cp "$i" www;
+    done
+fi
 
 
