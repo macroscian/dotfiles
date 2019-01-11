@@ -11,21 +11,38 @@ module use -a /camp/apps/eb/dev/modules/all
 module use -a /camp/apps/eb/intel-2017a/modules/all
 module use -a ${my_lab}working/kellyg/code/eb/modules/all
 module use -a ${my_lab}working/software/modules/all
+module use -a ${my_lab}working/software/eb/modules/all
 
-export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
-
-
-export PATH=$PATH:/camp/stp/babs/working/kellyg/code/bin:. # So local R can be found in directories
 export my_working=${my_lab}working/$USER/
-export my_html=${my_lab}www/$USER/public_html/LIVE/
+w=${my_working}
+l=${my_lab}
+export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
+export NXF_HOME=${my_working}code/nextflow
+export JULIA_PKGDIR=${my_working}code/julia/library
+export PATH=/camp/stp/babs/working/kellyg/code/bin/tex/bin/x86_64-linux:/camp/stp/babs/working/kellyg/code/bin:$PATH # So local R can be found in directories
 export my_emailname="gavin.kelly"
-export my_scratch=${my_lab}scratch/$USER/
 export my_webspace=https://shiny-bioinformatics.crick.ac.uk/~$USER/
 export my_r_package=${my_working}code/R/crick.kellyg
 export MY_R_PACKAGE=${my_working}code/R/crick.kellyg # I used to name this capitalised
 export my_projects=${my_working}projects/
+p=${my_projects}
 export TERM=gnome
-export EDITOR="/usr/bin/emacs -nw -Q"
+
+export ALTERNATE_EDITOR=""
+export EDITOR="emacs -nw"                  # $EDITOR opens in terminal
+export VISUAL="emacs"                      # $VISUAL opens in GUI mode
+function em ()
+{
+if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
+then
+    module load Emacs
+    module load git
+    emacs $@ &
+else
+    srun --ntasks=1 --x11 -D $PWD emacs $@ &
+fi
+}
+
 source $HOME/.bash.slurm #load slurm aliases
 
 # Completions
@@ -42,6 +59,9 @@ _cycle_dirs()
 # User specific aliases and function
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias l='ls -Hlrt'
+alias lr='ls -Hlrt *.@(r|R|rmd|Rmd)'
+alias lscr='ls -Hlrt *.@(r|R|rmd|Rmd|sh|nf|py)'
+alias lnscr='ls -Hlrtd  !(*.r|*.R|*.Rmd|*.sh|*.nf|*.py) | egrep -v ^d'
 alias ll='ls -lrt -I VERSION -I CHANGES -I SESSION_INFO -I README'
 alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
@@ -57,23 +77,12 @@ alias dirs='dirs -v | sed "s;$my_projects;;g"'
 alias duh="du -d 1 -h | sort -h"
 
 
-function em ()
-{
-if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
-then
-    module load Emacs
-    module load git
-    emacs $@ &
-else
-    srun --ntasks=1 --x11 -D $PWD emacs $@ &
-fi
-}
 function rout ()
 {
     tail $@*.{err,out}.log
 }
 
-
+alias queue='ml R; Rscript -e "library(tidyr);library(dplyr); read.table(pipe(\"squeue -o \\\"%.7i %.9P %.8j %.8u %.2t %.10M %.6D %C\\\"\"), sep=\"\", header=TRUE) %>% group_by(USER, ST) %>% summarise(n=n(), cpu=sum(CPUS)) %>% arrange(desc(ST), desc(cpu)) %>% as.data.frame()"'
 
 ################################################################
 #### Interact with project directories
@@ -117,3 +126,38 @@ then
     cd $my_working
 fi
 
+function Rscript ()
+{
+source R-*-local
+command Rscript "$@"
+}
+function R ()
+{
+source R-*-local
+command R $@
+}
+
+
+function knit ()
+{
+local myName="$@"
+runR="Rscript"
+numberR=`ls R-*-local | wc -l`
+if [ $numberR -eq 1 ]; then
+   source R-*-local
+else
+   echo "Too many R versions" 1>&2
+   return 1
+fi
+rnwinput=$1
+fileName=${rnwinput%.*}
+echo "library(knitr); knit(input='$rnwinput');" | R --no-save --no-restore
+pandoc -o ${fileName}.pdf ${fileName}.md
+}
+
+function wd ()
+{
+    MY_PATH=$(readlink -f $1)
+    NEW_PATH=${MY_PATH/\/camp\/stp/data.thecrick.org}
+    echo \\\\${NEW_PATH//\//\\}
+}

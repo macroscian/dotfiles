@@ -22,6 +22,7 @@ function myq ()
 squeue -u kellyg -o  "%.28j %.6i %.9P %.2t %.10M %.6D %R"
 }
 
+
 function rslurm ()
 {
 local myName="$@"
