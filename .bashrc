@@ -1,17 +1,16 @@
-#module load python/2.7.3
-# .bashrcs
 # Source global definitions
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 source $HOME/.secrets #Things I don't need on github
-# provides my_lab, slackMessageID, slackName
+# provides my_lab, SLACK_URL
 shopt -s direxpand
-module use -a /camp/apps/eb/dev/modules/all
-module use -a /camp/apps/eb/intel-2017a/modules/all
-module use -a ${my_lab}working/kellyg/code/eb/modules/all
-module use -a ${my_lab}working/software/modules/all
-module use -a ${my_lab}working/software/eb/modules/all
+
+#source ${my_lab}working/software/modulepath_new_software_tree_2018-08-13
+module purge
+module unuse /camp/stp/babs/working/software/modules/all /camp/stp/babs/working/software/eb/modules/all
+module use /camp/apps/eb/dev/modules/all /camp/apps/eb/intel-2017a/modules/all /camp/apps/eb/modules/all /camp/apps/misc/stp/babs/manual/modules/all /camp/apps/misc/stp/babs/easybuild/modules/all
+
 
 export my_working=${my_lab}working/$USER/
 w=${my_working}
@@ -19,7 +18,9 @@ l=${my_lab}
 export PYTHONPATH=$PYTHONPATH:${my_lab}working/patelh/code/PYTHON/
 export NXF_HOME=${my_working}code/nextflow
 export JULIA_PKGDIR=${my_working}code/julia/library
-export PATH=/camp/stp/babs/working/kellyg/code/bin/tex/bin/x86_64-linux:/camp/stp/babs/working/kellyg/code/bin:$PATH # So local R can be found in directories
+export JULIA_DEPOT_PATH=${my_working}code/julia/library
+export BIN=${my_working}code/bin
+export PATH=$BIN/tex/bin/x86_64-linux:$BIN:$PATH:$HOME/bin:.
 export my_emailname="gavin.kelly"
 export my_webspace=https://shiny-bioinformatics.crick.ac.uk/~$USER/
 export my_r_package=${my_working}code/R/crick.kellyg
@@ -28,22 +29,42 @@ export my_projects=${my_working}projects/
 p=${my_projects}
 export TERM=gnome
 
+export DICPATH=/camp/stp/babs/working/docs/spell
 export ALTERNATE_EDITOR=""
-export EDITOR="emacs -nw"                  # $EDITOR opens in terminal
-export VISUAL="emacs"                      # $VISUAL opens in GUI mode
-function em ()
+export EDITOR="/camp/stp/babs/working/kellyg/code/bin/emacsclient  -nw"                  # $EDITOR opens in terminal
+export VISUAL="/camp/stp/babs/working/kellyg/code/bin/emacsclient -c "                      # $VISUAL opens in GUI mode
+(
+    if [[ $(ps -ef | grep $USER".*emacs --daemon" | wc -l) == 1 ]]
+    then 
+	module -q load hunspell
+	module -q load Emacs/25.1-foss-2016b
+	module -q load git/2.14.2-foss-2016b
+#	module -q load XZ/.5.2.2-GCC-5.4.0-2.26
+#	module -q load Pango/1.40.3-foss-2016b
+	/camp/stp/babs/working/kellyg/code/bin/emacs --daemon
+    fi
+)
+    
+function ed ()
 {
-if [[ $HOSTNAME == lifcpu* ]] ||[[ $HOSTNAME == ca170* ]] ||[[ $HOSTNAME == ca193* ]] 
-then
-    module load Emacs
-    module load git
-    emacs $@ &
-else
-    srun --ntasks=1 --x11 -D $PWD emacs $@ &
+#if [[ $HOSTNAME == babs* ]] 
+#then
+if [[ $(ps -ef | grep $USER".*emacs --daemon" | wc -l) == 1 ]]
+then 
+    module -q load hunspell
+    module -q load Emacs/25.1-foss-2016b
+    module -q load git/2.14.2-foss-2016b
+    #   module -q load XZ/.5.2.2-GCC-5.4.0-2.26
+    #   module -q load Pango/1.40.3-foss-2016b
+    /camp/stp/babs/working/kellyg/code/bin/emacs --daemon
 fi
+#    module -q load XZ/.5.2.2-GCC-5.4.0-2.26
+/camp/stp/babs/working/kellyg/code/bin/emacsclient -c $@ &
+# else
+#     srun --ntasks=1 --x11 -D $PWD emacs $@ &
+# fi
 }
 
-source $HOME/.bash.slurm #load slurm aliases
 
 # Completions
 complete -f -X '!*.[r|R]' er
@@ -67,19 +88,15 @@ alias screen='screen -U'
 alias prompt='unset PROMPT_COMMAND; stty igncr -echo'
 alias rm="rm -i"
 export PS1="[\h \W]\$ "
-alias xt="srun --ntasks=1 --x11  xterm &"
 alias cdw="cd $my_working"
 alias r='R --no-save --no-restore'
-alias rx="module load R/3.3.1-foss-2016b-libX11-1.6.3; R"
-alias rbc="module load R/3.3.1-foss-2016b-bioc-3.3-libX11-1.6.3; R"
-alias template="cp -n /camp/stp/babs/working/kellyg/code/R/template/* ."
 alias dirs='dirs -v | sed "s;$my_projects;;g"'
 alias duh="du -d 1 -h | sort -h"
 
 
-function rout ()
+function tout ()
 {
-    tail $@*.{err,out}.log
+    tail $@*.out
 }
 
 alias queue='ml R; Rscript -e "library(tidyr);library(dplyr); read.table(pipe(\"squeue -o \\\"%.7i %.9P %.8j %.8u %.2t %.10M %.6D %C\\\"\"), sep=\"\", header=TRUE) %>% group_by(USER, ST) %>% summarise(n=n(), cpu=sum(CPUS)) %>% arrange(desc(ST), desc(cpu)) %>% as.data.frame()"'
@@ -103,23 +120,8 @@ function cdpro ()
 cd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '*/\.*' -iname \*$1\* -printf '%P\n' | tail -1)
 }
 
-function pushdpro ()
-{
-pushd $my_projects$(find $my_projects -maxdepth 3 -mindepth 1 -type d -not -path  '*/\.*' -iname \*$1\* -printf '%P\n' | tail -1)
-}
-
-#Make function directory
-function startpro()
-{
-mkdir -p $1
-cp -r ${my_working}code/R/template/* $1
-git init --template=${my_working}code/R/template/.git_template $1
-}
 
 
-
-
-source $HOME/.bash.slack #load slack functions
 
 if [[ "$PWD" == ~ ]] 
 then
@@ -128,32 +130,29 @@ fi
 
 function Rscript ()
 {
-source R-*-local
-command Rscript "$@"
+    if test -f R-*-local; then
+	source R-*-local
+	command Rscript "$@"
+    else
+	module use /camp/apps/misc/stp/babs/manual/modules/all
+	module load R
+	command Rscript "@"
+    fi
 }
+
 function R ()
 {
-source R-*-local
-command R $@
+    if test -f R-*-local; then
+	source R-*-local
+	command R "$@"
+    else
+	module use /camp/apps/misc/stp/babs/manual/modules/all
+	module load R/3.6.0-foss-2016b-BABS
+	command R "@"
+    fi
 }
 
 
-function knit ()
-{
-local myName="$@"
-runR="Rscript"
-numberR=`ls R-*-local | wc -l`
-if [ $numberR -eq 1 ]; then
-   source R-*-local
-else
-   echo "Too many R versions" 1>&2
-   return 1
-fi
-rnwinput=$1
-fileName=${rnwinput%.*}
-echo "library(knitr); knit(input='$rnwinput');" | R --no-save --no-restore
-pandoc -o ${fileName}.pdf ${fileName}.md
-}
 
 function wd ()
 {

@@ -5,12 +5,10 @@
 ;; Things that are most likely specific to my way of working are probably signalled by use of anything derived from any calls to "user-login-name" or "gpk-babshome".  These are probably worth searching for.
 
 ;; ess and org are the two most pimped-out packages:
-;; ESS - I have a funny way of loading R, and I'm in the process of changing it so refresh-r-version is probably not needed by most people.
 ;; ORG - I have a yasnippet code that auto-inserts new projects to have certain properties, so a lot of the defun's there are to do with that - I'll try to put the snippets on github as well so that it makes sense.
 
-
 ;; Localisation
-(if (string-match "thecrick" (system-name))
+(if (string-match "babs" (system-name))
     (setq gpk-babshome (getenv "my_lab")
 	  gpk-oncamp t)
   (setq gpk-babshome "I:\\"
@@ -24,29 +22,82 @@
 ;;(setq use-package-always-ensure t)
 (require 'package)
 (add-to-list 'package-archives
- 	     '("marmalade" .
- 	       "http://marmalade-repo.org/packages/"))
-(add-to-list 'package-archives
  	     '("MELPA" .
  	       "http://melpa.milkbox.net/packages/"))
 (package-initialize)
 (require 'use-package)
-
+(require `dash)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Prefs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
-(load-theme 'solarized t)
-(if gpk-oncamp
-    (set-face-attribute 'default nil :family "Input")
-  (set-face-attribute 'default nil :family "Consolas")
+;; (load-theme 'solarized t)
+(setq visible-bell t)
+(setq solarized-use-variable-pitch nil)
+(setq solarized-scale-org-headlines nil)
+(load-theme 'solarized-light t)
+;(set-face-attribute 'region nil :foreground "#eee8d5" :background "#839496") 
+(let ((line "#cccec4"))
+  (set-face-attribute 'mode-line          nil :overline   line)
+  (set-face-attribute 'mode-line-inactive nil :overline   line)
+  (set-face-attribute 'mode-line-inactive nil :underline  line)
+  (set-face-attribute 'mode-line          nil :box        nil)
+  (set-face-attribute 'mode-line-inactive nil :box        nil)
+  (set-face-attribute 'mode-line          nil :background "#2aa198")
+  (set-face-attribute 'mode-line          nil :foreground "#532f62")
+  (set-face-attribute 'mode-line-inactive nil :background "#eee8d5")
   )
-;; Use monospaced font faces in current buffer
-(defun my-buffer-face-mode-fixed ()
-  "Sets a fixed width (monospace) font in current buffer"
-  (interactive)
-  (setq buffer-face-mode-face '(:family "Input-mono"))
-  (buffer-face-mode))
+(set-cursor-color "#2aa198") 
+
+
+
+(setq ibuffer-saved-filter-groups
+      '(("home" 
+	 ("R scripts" (or (mode . ess-r-mode)
+			  (filename . "rmd$")))
+	 ("R" (mode . inferior-ess-r-mode))
+	 ("Org" (or (mode . org-mode)
+		    (filename . "OrgMode")))
+	 ("dired" (mode . dired-mode))
+	 ("emacs" (or
+		   (name . "^\\*scratch\\*$")
+		   (name . "^\\*Messages\\*$")
+		   (filename . ".emacs.d")
+		   (filename . ".emacs")
+		   (filename . "emacs-config")
+		   ))
+	 ;; ("Web Dev" (or (mode . html-mode)
+	 ;; 		(mode . css-mode)))
+	 ("Magit" (name . "\*magit"))
+	 ("Help" (or (name . "\*Help\*")
+		     (name . "\*Apropos\*")
+		     (name . "\*info\*"))))))
+(setq ibuffer-show-empty-filter-groups nil)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+(add-hook 'ibuffer-mode-hook
+	  '(lambda ()
+	     (ibuffer-auto-mode 1)
+	     (ibuffer-switch-to-saved-filter-groups "home")))
+
+(use-package moody
+  :config
+  (setq x-underline-at-descent-line t)
+  (moody-replace-mode-line-buffer-identification)
+  (moody-replace-vc-mode))
+
+
+(use-package minions
+   :config (minions-mode 1))
+
+
+(set-fontset-font t '(#xe100 . #xe16f) "Iosevka") ;; see link on my-ESS-pretty-hook
+    
+(if gpk-oncamp
+    (add-to-list 'default-frame-alist '(font . "Iosevka-12" ))
+  (add-to-list 'default-frame-alist '(font . "Consolas" ))
+  )
+
 (menu-bar-mode nil) 
 (scroll-bar-mode -1)
 (setq inhibit-splash-screen t)
@@ -63,13 +114,13 @@
 (add-hook 'text-mode-hook 'turn-on-auto-fill) ; wrap long lines in text mode
 ;;Shell
 (setq shell-file-name "bash")
-(setq shell-command-switch "-ic")
+(setq shell-command-switch "-c")
 ;; Scrolling
 (setq scroll-preserve-screen-position "always"
       scroll-conservatively 5
       scroll-margin 2)
-(global-set-key [(control v)]  (lambda () (interactive) (scroll-up 1)))
-(global-set-key [(control b)]  (lambda () (interactive) (scroll-down 1)))
+(global-set-key (kbd "M-n") (kbd "C-u 1 C-v"))
+(global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
 (winner-mode 1)
 ;;Backup Prefs
 (setq
@@ -96,12 +147,37 @@
   (let ((buffer-backed-up nil))
     (backup-buffer)))
 (add-hook 'before-save-hook  'force-backup-of-buffer)
-
-
+;Spelling
+(setq ispell-really-hunspell t)
+(setq ispell-program-name "hunspell")
+(setq ispell-local-dictionary "en_GB")
+(setq ispell-hunspell-dictionary-alist
+      '(("en_GB" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_GB") nil utf-8)
+	))
+(setq uniquify-buffer-name-style 'post-forward)
+(setq uniquify-strip-common-suffix nil)
+(remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode)
+  (define-key company-active-map [return] nil)
+  (define-key company-active-map [tab] 'company-complete-common)
+  (define-key company-active-map (kbd "TAB") 'company-complete-common)
+  (define-key company-active-map (kbd "M-TAB") 'company-complete-selection)
+  (setq company-selection-wrap-around t
+	company-tooltip-align-annotations t
+	company-idle-delay 0.5
+	company-minimum-prefix-length 2
+	company-tooltip-limit 10)
+  )
 
 (use-package outshine
   :init
@@ -156,6 +232,8 @@
   (diredp-toggle-find-file-reuse-dir 1)
   )
 
+
+
 (use-package ess
   :commands (R julia)
   :mode (("\\.r\\'" . R-mode)
@@ -164,12 +242,12 @@
 	 ("\\.jl\\'" . ess-julia-mode))
   :init
   (setq ess-default-style 'RStudio)
+  (setq ess-use-flymake nil)
   :config
   (require 'ess-site)
   (require 'polymode)
   (add-hook `ess-mode-hook  `my-ESS-pretty-hook)
-  (add-hook 'R-mode-hook 'refresh-r-version)
-;  (add-hook `iESS-mode-hook `my-buffer-face-mode-fixed)
+;  (add-hook 'R-mode-hook 'refresh-r-version)
   (bind-key "C-c C-j"  'replace-loop-with-first ess-mode-map)
   (bind-key "M-q" 'kbw ess-help-mode-map)
   (bind-key "C-c w" 'ess-execute-screen-options inferior-ess-mode-map)
@@ -179,29 +257,18 @@
   (setq comint-input-ring-size 1000)
   (setq-default ess-dialect "R")
   (setq ess-eval-visibly nil)
-   (setq ess-ask-for-ess-directory nil
+   (setq ;ess-ask-for-ess-directory nil
   	inferior-R-args "--no-save --no-restore")
-   ;; (use-package ess-tracebug
-   ;;   :init
-   ;;   (ess-tracebug t)
-   ;;   )
-  :preface
+   :preface
+   (add-hook 'ess-mode-hook (lambda () (setq inferior-ess-r-program (concat "./" (car (file-name-all-completions "R-3" "."))))))
+   
   (setq inferior-julia-program "./julia.sh")
   (setq ess-ask-for-ess-directory nil)
   (setq ess-history-file nil)
   (setq comint-scroll-to-bottom-on-input t)
   (setq comint-scroll-to-bottom-on-output t)
   (setq comint-move-point-for-output t)
-  (defun kbw ()
-    "kill"
-    (interactive) (kill-buffer-and-window)
-    )
-  (defun refresh-r-version ()
-    "Find newest version of R, which might be local"
-    (setq ess-newest-R nil)
-    (setq inferior-ess-r-program (car (ess-find-exec-completions "R-3" ".")))
-;    (ess-check-R-program)
-    )
+  
   (defun replace-loop-with-first ()
     "Replace a loop with setting the variable to first possible value"
     (interactive)
@@ -209,21 +276,12 @@
       (let ((original (buffer-substring (line-beginning-position) (line-end-position)))
 	    )
 	(if (string-match " \*for (\\(\.\*\\) in \\(\.\*\\)) { \*" original)
-	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[1]" t nil original) nil nil)
+	    (ess-eval-linewise (replace-match "\\1 <- (\\2)[[1]]" t nil original) nil nil)
 	  )
 	)
       )
     (ess-next-code-line 1)
     )
-  (defun switch-project ()
-    "Send instructions to R to clear workspace"
-    (interactive)
-    (ess-send-string
-     (get-process "R")
-     (concat "switchProject(\"" default-directory "\")")
-     )
-    )
-  
   (defun gpk-ess-clip ()
     (interactive)
     "Evaluate region and store results in kill ring"
@@ -232,10 +290,13 @@
 			 4)
 	      ))
   (defun my-ESS-pretty-hook ()
-    "Set pretty symbols for R"
-    (setq prettify-symbols-alist '(("%>%"  . ?►) ("<-"  . ?←) ("==" . ?≡) ("%<>%" . ?◄) ("%in%" . ?∈)))
+    "Set pretty symbols for R" ;;https://www.reddit.com/r/emacs/comments/96q8r3/configuring_iosevka_ligatures_for_emacs/
+    (setq prettify-symbols-alist '(("%>%"  . ?⟫) ("<-"  . #Xe137) ("!=" . ?≠) ("==" . ?≡) ("%<>%" . ?⟪) ("%in%" . ?∈)))
     )
-   )
+  )
+
+(use-package pandoc-mode
+  :hook markdown-mode)
 
 (use-package markdown-mode
   :ensure t
@@ -243,7 +304,7 @@
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown")
+  :init (setq markdown-command "pandoc")
   )
 
 (use-package polymode 
@@ -266,10 +327,16 @@
 
 (use-package org
   :init
+  (setq org-priority-faces
+      '(
+	(?A :foreground "red" :background "yellow" :box t)
+	(?B :foreground "black" :background "yellow")
+	(?C . "blue")))
+
   (setq org-hide-emphasis-markers t)
   (setq gpk-working-directory (concat gpk-babshome "working/" user-login-name "/"))
   (setq gpk-project-orgfile (concat gpk-working-directory "work.org"))
-  (setq org-agenda-start-day "-7d") 
+;  (setq org-agenda-start-day "0d") 
   (add-to-list 'auto-mode-alist '("README$" . org-mode))
   (defun my-org-confirm-babel-evaluate (lang body)
     (not (string= lang "elisp")))  ; don't pester 
@@ -284,7 +351,7 @@
 	   "nt%?")
 	  ("p" "Project" plain (file org-default-notes-file)
 	   "np%?")))
-  (setq org-time-clocksum-format "%d:%02d")
+  (setq org-duration-format (quote h:mm))
   (defun my-org-clocktable-indent-string (level)
     (if (= level 1)
 	""
@@ -296,40 +363,84 @@
   (advice-add 'org-clocktable-indent-string :override #'my-org-clocktable-indent-string)
   
   (defun gpk-org-property (prop)
-    (downcase (plist-get (nth 1 (org-element-at-point)) prop))
+    (downcase (org-entry-get nil prop))
+    )
+  (defun gpk-first-tag ()
+    (nth 1 (split-string (nth 5 (org-heading-components)) ":"))
     )
   (defun gpk-guess-directory ()
     (interactive)
     "Open dired at best guess for where project lives"
-    (let* ((lab (gpk-org-property :LAB))
-	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property :SCIENTIST)))
-	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property :PROJECT)))
-	   (guess-dir (concat gpk-working-directory "projects/" lab "/" scientist "/" project))
-	   (template-dir (car (plist-get (nth 1 (org-element-at-point)) :tags)))
+    (let* ((lab (gpk-org-property "Lab"))
+	   (asf (gpk-org-property "asf"))
+	   (scientist (replace-regexp-in-string "@crick.ac.uk" "" (gpk-org-property "Scientist")))
+	   (project (replace-regexp-in-string "[^[:alnum:]]" "_" (gpk-org-property "Project")))
+	   (project-path (gpk-org-property "path"))
 	   )
-      (if (file-exists-p guess-dir)
+      (if (file-exists-p project-path)
 	  (if (equal current-prefix-arg nil)
-	      (find-file (ido-read-file-name "Find File:" guess-dir))
-	    (let ((default-directory guess-dir))
+	      (find-file (ido-read-file-name "Find File:" project-path))
+	    (let ((default-directory project-path))
 	      (shell)))
-	(shell-command (concat "git clone --depth=1 " ; forget most of the history
-			       "--template=" gpk-working-directory "templates/.git_template " ; hook that puts each commit in a database
-			       "file:///" gpk-babshome "working/" user-login-name "/templates/" template-dir " " guess-dir
-			       ))
-	(shell-command (concat "cd " guess-dir ";git remote remove origin"))
+	(let ((default-directory (concat gpk-babshome "working/" user-login-name "/templates")))
+	  (shell-command (concat "make " (gpk-first-tag) " lab=" lab " sci=" scientist " project=" project " asf=" asf))
+	  )
 	)
       )
     )
+
+  (defun gpk-treemacsify ()
+    (interactive)
+    "Put org projects into treemacs workspaces"
+    (write-region "" nil treemacs-persist-file)
+    (org-map-entries
+     (lambda ()
+       (let* (
+	      (path (org-entry-get nil "path"))
+	      (title (org-entry-get nil "ITEM"))
+	      (path-p (and path (file-directory-p path)))
+	      )
+	 (if (equal 1 (org-outline-level))
+	     (write-region (concat "* " title "\n") nil treemacs-persist-file t)
+	   (when path-p 
+	     (write-region (concat "** " title "\n") nil treemacs-persist-file t)
+	     (write-region (concat "- path :: " path "\n") nil treemacs-persist-file t)
+	     )
+	   )))
+     "LEVEL<=2" (list gpk-project-orgfile)
+     )
+    (find-file treemacs-persist-file)
+    (goto-char (point-min))
+    (while (re-search-forward "^\* .*\n\\(\*\\s-\\)" nil t)
+      (replace-match "\\1"))
+    (goto-char (point-min))
+    (while (re-search-forward "^\* .*\n\\'" nil t)
+      (replace-match ""))
+    (save-buffer)
+    (kill-buffer)
+    (treemacs--restore)
+    )
+  
+  
+  
   (bind-key "C-c a"  'org-agenda)
   (bind-key "C-c c" 'org-capture)
   (bind-key "C-c o" 'gpk-guess-directory)
   )
+
+(use-package org-fancy-priorities
+  :ensure t
+  :hook
+  (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
 
 (use-package yasnippet
   :commands
   (yas-minor-mode)
   :init
   (setq yas-indent-line 'fixed)
+  (yas-global-mode 1)
   (add-hook 'prog-mode-hook #'yas-minor-mode)
   (add-hook 'org-mode-hook #'yas-minor-mode)
   (add-hook 'ess-mode-hook #'yas-minor-mode)
@@ -429,11 +540,106 @@
     (mapcar (lambda (gs) (concat (car gs) " " (car (cdr gs)))) grant-row)
     )
   )
-   
-  
-   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Interacting with slurm
+(require 'transient)
+(load "~/.emacs.d/gpk/slurm.el")
+(defun gpk-slurmacs-args (trans)
+  "Give a grouped list of all arguments in a transient suffix"
+  (mapcar (lambda (grp) (cons (plist-get (aref grp 2) :description)
+			 (seq-map (lambda (cmd) (plist-get (third cmd) :argument)) (aref grp 3))))
+	  (get trans 'transient--layout)
+	  ))
+(defun gpk-slurmacs-sub-args (args grouped-args group)
+  "Find which args belong to a specific group"
+  (let (
+	(these-args (cdr (seq-find (lambda (grp) (string= (car grp) group)) grouped-args)))
+	)
+    (seq-filter (lambda (argstr)
+		  (member (replace-regexp-in-string "\\(=\\).*" "\\1" argstr) these-args)
+		  )
+		args)
+    )
+  )
+(defun gpk-paste (args sep)
+  "Implement R's paste command"
+  (mapconcat 'identity args sep)
+  )
+
+(defun gpk-build-slurm (args)
+  "Make the bash script that will submit to slurm"
+  (interactive (list (transient-args 'slurmacs-transient)))
+  (let* ((this-file (buffer-file-name (current-buffer)))
+	 (all-args (gpk-slurmacs-args 'slurmacs-transient))
+	 (slurm-args (gpk-slurmacs-sub-args args all-args "Arguments"))
+	 (rmd-args (gpk-slurmacs-sub-args args all-args "Markdown"))
+	 (srun (cond ((bound-and-true-p poly-markdown+r-mode)
+		      (concat "R -e \"rmarkdown::render('" this-file "', " (gpk-paste rmd-args ",")"')\"")
+		      )
+		     ((eq major-mode `ess-r-mode)
+		      (concat "Rscript \"" this-file "\"")
+		      )
+		     (t this-file)
+		     )
+	       )
+	 )
+    (concat "sbatch " (gpk-paste slurm-args " ") " <<EOF
+#!/bin/bash
+srun " srun  "
+[[ -z \"${SLACK_URL}\" ]] || curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"'$SLURM_JOB_NAME' has finished\"}' \"${SLACK_URL}\"
+EOF")
+ 	     )
+  )
+
+(defun slurmacs-submit (&optional args)
+  "Submit script to CAMP"
+  (interactive (list (transient-args 'slurmacs-transient)))
+  (shell-command-to-string (gpk-build-slurm args))
+  )
+
+(defun slurmacs-message (&optional args)
+  "Submit script to CAMP"
+  (interactive (list (transient-args 'slurmacs-transient)))
+  (setq shell-script (gpk-build-slurm args))
+  (switch-to-buffer "slurm.sh")
+  (insert shell-script)
+  )
+
+
+(define-transient-command slurmacs-transient ()
+  "Slurmacs"
+  :value (lambda () (list (concat "--output=" (buffer-file-name) ".out.log")
+		     (concat "--error=" (buffer-file-name) ".err.log")
+		     (concat "--job-name=\"" (buffer-name) "\"")
+		     (concat "output_file='" (file-name-base) ".html'")
+		     (concat "output_dir='" default-directory (car (ess-get-words-from-vector "dirname(vDevice())\n")) "'")
+		     "--mem-per-cpu=8G"  "--partition=cpu" "--time=1:00:00" "--cpus-per-task=4"
+		     ))
+  ["Arguments"
+   ("-t" "Time Limit" "--time=")
+   ("-p" "Partition" "--partition=")
+   ("-c" "CPUs" "--cpus-per-task=")
+   ("-m" "Memory" "--mem-per-cpu=")
+   ("-l" "Log" "--output=")
+   ("-e" "Error file" "--error=")
+   ("-J" "Job Name" "--job-name=")
+   ]
+  ["Markdown"
+   :if (lambda () (bound-and-true-p poly-markdown+r-mode))
+   ("-o" "Output file" "output_file=")
+   ("-d" "Output dir" "output_dir=")
+   ]
+  ["Actions"
+   ("s" "Submit to slurm" slurmacs-submit)
+   ("b" "Build script" slurmacs-message)
+   ]
+  )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 
@@ -462,6 +668,8 @@
  '(ess-swv-pdflatex-commands (quote ("pdflatex" "texi2pdf" "make")))
  '(ess-swv-processor (quote knitr))
  '(hl-sexp-background-color "#efebe9")
+ '(markdown-command "pandoc" t)
+ '(moody-mode-line-height 20)
  '(org-clock-rounding-minutes 60)
  '(org-link-frame-setup
    (quote
@@ -474,7 +682,8 @@
  '(org-use-speed-commands t)
  '(package-selected-packages
    (quote
-    (use-package poly-R zenburn-theme zenburn solarized-theme spacemacs-theme projectile markdown-mode polymode outshine image+ color-theme-solarized groovy-mode leuven-theme ess f bookmark+ dired+ highlight-parentheses undo-tree))))
+    (transient pretty-symbols org-fancy-priorities slack moody flucui-themes company pdf-tools pandoc-mode flycheck zenburn markdown-mode outshine image+ color-theme-solarized groovy-mode ess f bookmark+ dired+ highlight-parentheses undo-tree)))
+ '(safe-local-variable-values (quote ((babshash . babs8aecf935)))))
 
 
 					;(custom-set-faces
@@ -489,6 +698,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(comint-highlight-input ((t (:inherit nil :foreground "#0000FF" :weight normal))))
- '(outline-1 ((t (:foreground "#268bd2" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 2.0 :family "utopia"))))
- '(outline-2 ((t (:foreground "#2aa198" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 1.8 :family "utopia"))))
- '(outline-3 ((t (:foreground "#b58900" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 1.5 :family "utopia")))))
+ '(outline-1 ((t (:foreground "#268bd2" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 1.6))))
+ '(outline-2 ((t (:foreground "#2aa198" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 1.4))))
+ '(outline-3 ((t (:foreground "#b58900" :box (:line-width 2 :color "grey75" :style pressed-button) :overline nil :weight bold :height 1.2)))))

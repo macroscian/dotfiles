@@ -2,7 +2,7 @@
 #name : New Project
 #contributor: Gavin Kelly <gavin.kelly@crick.ac.uk>
 # --
-** ${1:$(upcase-initials (replace-regexp-in-string "\\\." " " yas-text))} $2 [[file:/camp/stp/babs/working/kellyg/projects/$3/$1/$2][⬎]] [/]
+** ${1:$(upcase-initials (replace-regexp-in-string "\\\." " " yas-text))} $2
 DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to-time 14)))`
 :PROPERTIES:
 :Scientist: ${1:scientist}@crick.ac.uk
@@ -11,11 +11,5 @@ DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to
 :Project: ${2:Project Name}
 :Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
 :Percentage: 0
-:File: 
+:path: ${3:$(downcase (concat gpk-working-directory "projects/" yas-text))}/${1:$(downcase yas-text)}//${2:$(downcase (replace-regexp-in-string "[^[:alnum:]]" "_" yas-text))}
 :END:
-*** TODO $0
-DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (days-to-time 14)))`
-:PROPERTIES:
-:Opened: `(format-time-string "<%Y-%m-%d %a>" (current-time))`
-:END:
-

@@ -1,6 +1,7 @@
 [user]
-	name = Gavin
+	name = Gavin Kelly
 	email = gavin.kelly@crick.ac.uk
+	signingkey = CC8F50DC
 	
 [init]
 	templatedir = ~/.git_template

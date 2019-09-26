@@ -6,14 +6,14 @@
         options(device=function (...) grDevices::X11(...,type='cairo'))
         options(bitmapType = 'cairo')
     }
-    myRVersion <- sub(".*/R/([^/]*)/.*", "\\1", .libPaths()[grepl("/camp/apps/eb", .libPaths())])
+    lpaths <- .libPaths()
+    myRVersion <- sub(".*/R/([^/]*)/.*", "\\1", .libPaths()[grepl("/camp/apps", lpaths)])[1]
     myRLIB <- file.path("/camp/stp/babs/working", Sys.info()["user"], "code/R/library",with(R.Version(), paste(major, minor, sep=".")))
+    lpaths[grepl("/camp/apps/eb", lpaths)] <- file.path("/camp/stp/babs/working/software/binaries/R-site-library", myRVersion)
     if (!dir.exists(myRLIB)) {
       dir.create(myRLIB)
     }
-    .libPaths(c(myRLIB,
-                file.path("/camp/stp/babs/working/software/binaries/R-site-library", myRVersion))
-              )
+    .libPaths(c(myRLIB,unique(lpaths)))
     setHook(packageEvent("DESeq2", "onLoad"),
             function(...) {
               res <- utils::getFromNamespace("results", "DESeq2")
@@ -22,15 +22,17 @@
             })
 }
 
-## setHook(packageEvent("grDevices", "onLoad"),
-##         function(...) grDevices::X11.options(type='cairo'))
 
 install.packages.gpk <- function(x) {
   x <- as.character(substitute(x))
   if (x %in% row.names(available.packages())) {
     install.packages(x)
   } else {
-    source("http://bioconductor.org/biocLite.R")
-    biocLite(x)
+    if (as.integer(R.Version()$year)>=2019) {
+      BiocManager::install(x)
+    } else{
+      source("http://bioconductor.org/biocLite.R")
+      biocLite(x)
+    }
   }
 }	
